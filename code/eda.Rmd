@@ -61,7 +61,7 @@ gene_map %>% head(10)
 ```
 
 
-## Load the quant data and sample information into DESeq2 datatype
+## Load the quant data and sample information into DESeq2 datatype, and run the DESeq2 normalization
 
 ```{r deseq2, message=FALSE, warning=FALSE}
 sample_table$condition <- factor((c('AML', 'AML', 'AML', 'AML', 'Healthy',

@@ -122,7 +122,7 @@ gene_map %>% head(10)
     ##  9 ENST00000832836 ENSG00000290825
     ## 10 ENST00000832832 ENSG00000290825
 
-## Load the quant data and sample information into DESeq2 datatype
+## Load the quant data and sample information into DESeq2 datatype, and run the DESeq2 normalization
 
 ``` r
 sample_table$condition <- factor((c('AML', 'AML', 'AML', 'AML', 'Healthy',
