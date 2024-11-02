@@ -3,6 +3,14 @@ Exploring transcript data profile of healthy and AML patient samples
 
 ## Loading the required libraries
 
+``` r
+library(tximport)
+library(tidyverse)
+library(DESeq2)
+library(RColorBrewer)
+library(pheatmap)
+```
+
 ## Loading the data
 
 Prepare the sample table of the experiment and load quant data generated
