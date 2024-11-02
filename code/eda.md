@@ -206,8 +206,12 @@ rownames_to_column(df, var = "sample_name") %>% as.tibble() %>%
 ggsave("../figures/PCA.png")
 ```
 
-Looks like we have two dots that consist of two overlap healthy samples,
-so that we only see five dots for healthy
+Healthy samples cluster closely together on the right side, forming a
+tight group distinct from the AML patient samples. AML samples appear to
+form two separate clusters along the PC2 axis (13.64% variance
+explained). Additionally, two overlapping healthy samples are
+represented by a single point so that we only see five dots for healthy
+samples.
 
 ## Heatmap
 
