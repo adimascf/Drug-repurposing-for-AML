@@ -54,4 +54,4 @@ data/quants/*/aux_info
 data/quants/*/libParams
 data/quants/*/logs
 data/quants/*/lib_format_counts.json
-
+data/quants/*/cmd_info.json
