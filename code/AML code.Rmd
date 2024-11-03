@@ -8,7 +8,6 @@ Exploring transcript data profile of healthy and AML patient samples
 ## Loading the required libraries
 ```{r}
 
-install.packages("ggplot2")
 library(ggplot2)
 library(tximport)
 library(tidyverse)
@@ -64,7 +63,7 @@ gene_map %>% head(10)
 sample_table$condition <- factor((c('AML', 'AML', 'AML', 'AML', 'Healthy',
                                          'Healthy', 'AML', 'AML', 'Healthy', 'Healthy',
                                          'Healthy', 'Healthy', 'Healthy', 'AML', 'AML')),
-                                      levels = c('AML', 'Healthy'))
+                                      levels = c('Healthy', 'AML'))
 
 dds_aml <- DESeqDataSetFromTximport(txi = count_data,
                                      colData = sample_table,
@@ -82,7 +81,7 @@ vst_aml <- varianceStabilizingTransformation(dds_aml)
 # create matrix
 vst_mat <- assay(vst_aml)
 
-pca <- prcomp(t(vst_mat))
+pca <- prcomp(t(vst_mat)) # to calculate PCA
 
 # plot out the data frame to produce PCA
 df <- as.data.frame(pca$x)
@@ -161,51 +160,53 @@ samples (technical replicates)?
 
 ```{r}
 # Normalize Gene Expression Data
-dds <- DESeq(dds)
+# dds <- DESeq(dds)
 
 # Extract Normalized Counts
-normalized_counts <- counts(dds, normalized = TRUE)
-head(normalized_counts)
+# normalized_counts <- counts(dds, normalized = TRUE)
+# head(normalized_counts)
 
 # Variance Stabilizing Transformation (VST)
-vsd <- vst(dds, blind = FALSE)
-rlog_data <- rlog(dds, blind = FALSE)  # Optional if you prefer rlog
+# vsd <- vst(dds, blind = FALSE)
+# rlog_data <- rlog(dds, blind = FALSE)  # Optional if you prefer rlog
 
 ```
 
 ## Verify normalization
 ```{r}
-# Plot a PCA
-plotPCA(vsd, intgroup = "condition")
+# Plot a PCA (ERROR HERE)
+#plotPCA(vsd, intgroup = "condition")
 
 # Heatmap: Use the normalized counts or VST-transformed data to generate a heatmap to check for clustering:
-top_var_genes <- head(order(rowVars(assay(vsd)), decreasing = TRUE), 500)
+#top_var_genes <- head(order(rowVars(assay(vsd)), decreasing = TRUE), 500)
 
 # Check and convert data to numeric if needed
-numeric_data <- as.matrix(apply(assay(vsd)[top_var_genes, ], 2, as.numeric))
+#numeric_data <- as.matrix(apply(assay(vsd)[top_var_genes, ], 2, as.numeric))
+
+
 
 # Plot the heatmap with numeric data
 # Ensure required libraries are loaded
-library(pheatmap)
-library(RColorBrewer)
+#library(pheatmap)
+#library(RColorBrewer)
 
 # Compute the distance matrix for samples
-distance <- dist(t(assay(vst_aml)))
-distance_matrix <- as.matrix(distance)
+#distance <- dist(t(assay(vst_aml)))
+#distance_matrix <- as.matrix(distance)
 
 # Ensure the row and column names are properly assigned
-rownames(distance_matrix) <- vst_aml$condition  # Adjust as needed (e.g., sample IDs or conditions)
-colnames(distance_matrix) <- colnames(vst_aml)  # Use sample names if available
+#rownames(distance_matrix) <- vst_aml$condition  # Adjust as needed (e.g., sample IDs or conditions)
+#colnames(distance_matrix) <- colnames(vst_aml)  # Use sample names if available
 
 # Define color palette for heatmap
-colors <- colorRampPalette(rev(brewer.pal(9, "Reds")))(255)
+#colors <- colorRampPalette(rev(brewer.pal(9, "Reds")))(255)
 
 # Plot the heatmap
-pheatmap(distance_matrix,
-         clustering_distance_rows = distance,
-         clustering_distance_cols = distance,
-         col = colors,
-         main = "Sample Clustering Heatmap")
+#pheatmap(distance_matrix,
+        # clustering_distance_rows = distance,
+       #  clustering_distance_cols = distance,
+       #  col = colors,
+        # main = "Sample Clustering Heatmap")
 
 
 ```
@@ -238,6 +239,9 @@ ggsave("../figures/heatmap_normalized.png")
 library(DESeq2)
 
 # Run the DESeq function to perform differential expression analysis
+dds <- DESeqDataSetFromTximport(txi = count_data,
+                                     colData = sample_table,
+                                     design = ~condition)
 dds <- DESeq(dds)
 
 # Obtain results for differential expression analysis
@@ -249,13 +253,12 @@ resOrdered <- res[order(res$padj), ]
 # Print summary of results
 summary(res)
 
-# Filter for significant DEGs
+# Filter for significant DEGs     # look for treshold references
 significant_DEGs <- subset(resOrdered, padj < 0.05 & abs(log2FoldChange) > 2)
 
 # Print the number of significant DEGs found
 print(paste("Number of significant DEGs:", nrow(significant_DEGs)))
-# --- output --- #
-# [1] "Number of significant DEGs: 844"
+
 ```
 
 
@@ -265,6 +268,12 @@ MA Plot
 ```{r}
 # MA plot to visualize log fold changes
 plotMA(res, ylim = c(-5, 5), main = "MA Plot of DEGs")
+
+# notes:
+# points below mean genes
+# minus log2fold change mean
+# blue dots 
+# the smaller mean, the bigger p-adjusted value (to eliminate false positives) 
 ```
 
 Volcano Plot
@@ -278,7 +287,7 @@ volcano_data$significant <- ifelse(volcano_data$padj < 0.05 & abs(volcano_data$l
 
 ggplot(volcano_data, aes(x = log2FoldChange, y = -log10(padj), color = significant)) +
   geom_point(alpha = 0.6) +
-  scale_color_manual(values = c("red", "grey")) +
+  scale_color_manual(values = c("red", "blue")) +
   theme_minimal() +
   ggtitle("Volcano Plot of DEGs") +
   xlab("Log2 Fold Change") +
@@ -291,8 +300,17 @@ ggplot(volcano_data, aes(x = log2FoldChange, y = -log10(padj), color = significa
 write.csv(significant_DEGs, file = "significant_DEGs.csv", row.names = TRUE)
 ```
 
+
+
+
 # Functional Annotation and Pathway Analysis (STILL ERROR)
 ```{r}
+
+# require annotation using ENSEMBL Biomark, enrich
+# clusterprofiler R package
+# biological process changed in AML bcs of AML, gene list of disturbed metabolisms to select drug target
+
+
 # Install the org.Hs.eg.db package if not already installed
 if (!requireNamespace("org.Hs.eg.db", quietly = TRUE)) {
   BiocManager::install("org.Hs.eg.db")
