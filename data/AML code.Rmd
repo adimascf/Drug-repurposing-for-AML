@@ -1,0 +1,322 @@
+---
+title: "AML code"
+output: html_document
+date: "2024-11-03"
+---
+
+Exploring transcript data profile of healthy and AML patient samples
+## Loading the required libraries
+```{r}
+
+install.packages("ggplot2")
+library(ggplot2)
+library(tximport)
+library(tidyverse)
+library(DESeq2)
+library(RColorBrewer)
+library(pheatmap)
+```
+## Loading the data
+
+Prepare the sample table of the experiment and load quant data generated
+by Salmon into R
+```{r}
+sample_table <- read_csv("SRP518774_metadata.txt") %>%
+  filter(`Assay Type` == "RNA-Seq") %>%
+  select(`Run`, `isolate`) %>%
+  mutate(condition = if_else(str_detect(isolate, "health"), "Control/Healthy", "AML Patient")) %>%
+  select(`Run`, condition) %>%
+  mutate(sample_name = Run) %>%
+  select(sample_name, condition)
+
+sample_table
+
+```
+
+```{r}
+sample_files <- paste0(pull(sample_table, 
+            sample_name), '_quant/quant.sf')
+
+sample_files <- paste0("../data/quants/", sample_files)
+
+#paste0(sample_files, '_quant/quant.sf')
+
+gene_map <- read_csv('gene_map.csv', 
+                     col_names = c('enstid', 'ensgid'))
+
+names(sample_files) <- pull(sample_table, sample_name)
+
+
+count_data <- tximport(files = sample_files,
+                       type = 'salmon', 
+                       tx2gene = gene_map,
+                       ignoreTxVersion = TRUE)
+
+# peek out counts data (non-normalized) and trancript - gene map
+count_data$counts %>% head(10)
+```
+
+```{r}
+gene_map %>% head(10)
+```
+## Load the quant data and sample information into DESeq2 datatype, and run the DESeq2 normalization
+```{r}
+sample_table$condition <- factor((c('AML', 'AML', 'AML', 'AML', 'Healthy',
+                                         'Healthy', 'AML', 'AML', 'Healthy', 'Healthy',
+                                         'Healthy', 'Healthy', 'Healthy', 'AML', 'AML')),
+                                      levels = c('AML', 'Healthy'))
+
+dds_aml <- DESeqDataSetFromTximport(txi = count_data,
+                                     colData = sample_table,
+                                     design = ~condition)
+
+# Normalization - median of ratios method TTM DESeq2
+dds_aml <- estimateSizeFactors(dds_aml)
+#normalizationFactors(dds_aml)
+counts(dds_aml, normalized = T) %>% head(10)
+```
+## Principal Component Analysis
+```{r}
+# Transform the data so it is suitable for PCA
+vst_aml <- varianceStabilizingTransformation(dds_aml)
+# create matrix
+vst_mat <- assay(vst_aml)
+
+pca <- prcomp(t(vst_mat))
+
+# plot out the data frame to produce PCA
+df <- as.data.frame(pca$x)
+df$condition <- sample_table$condition
+
+pve <- round(pca$sdev^2/sum(pca$sdev^2) * 100, 2)
+
+rownames_to_column(df, var = "sample_name") %>% as.tibble() %>%
+  ggplot(., aes(x=PC1, y=PC2, color = condition)) +
+  geom_point(size = 4) +
+  #geom_text(aes(label = sample_name, color = condition), vjust = -1, size = 4) +
+  xlab(label = paste0("PC1 (", pve[1], "%)")) +
+  ylab(label = paste0("PC2 (", pve[2], "%)")) +
+  theme_classic() +
+  ggtitle("Principal Component Analysis")
+```
+```{r}
+
+library(ggplot2)
+ggsave("../figures/heatmap.png")
+
+```
+
+
+Healthy samples cluster closely together on the right side, forming a
+tight group distinct from the AML patient samples. AML samples appear to
+form two separate clusters along the PC2 axis (13.64% variance
+explained). Additionally, two overlapping healthy samples are
+represented by a single point so that we only see five dots for healthy
+samples.
+
+
+## Heatmap
+
+```{r}
+distance <- dist(t(assay(vst_aml)))
+distance_matrix <- as.matrix(distance)
+rownames(distance_matrix) <- vst_aml$condition
+colnames(distance_matrix) <- vst_aml$condition
+colors <- colorRampPalette( rev(brewer.pal(9, "Reds")) )(255)
+
+pheatmap(distance_matrix,
+         clustering_distance_rows=distance,
+         clustering_distance_cols=distance,
+         col=colors)
+
+```
+
+
+```{r}
+library(ggplot2)
+ggsave("../figures/heatmap.png")
+```
+
+
+```{r}
+distance <- dist(t(assay(vst_aml)))
+distance_matrix <- as.matrix(distance)
+rownames(distance_matrix) <- vst_aml$condition
+colnames(distance_matrix) <- vst_aml$sample_name
+colors <- colorRampPalette( rev(brewer.pal(9, "Reds")) )(255)
+
+pheatmap(distance_matrix,
+         clustering_distance_rows=distance,
+         clustering_distance_cols=distance,
+         col=colors)
+```
+
+Comnfirmed with the heatmap, two dots consist of two samples that very
+very similiar. Is that come from same person but different processed
+samples (technical replicates)?
+
+
+
+## Data Normalization with DESeq2
+
+```{r}
+# Normalize Gene Expression Data
+dds <- DESeq(dds)
+
+# Extract Normalized Counts
+normalized_counts <- counts(dds, normalized = TRUE)
+head(normalized_counts)
+
+# Variance Stabilizing Transformation (VST)
+vsd <- vst(dds, blind = FALSE)
+rlog_data <- rlog(dds, blind = FALSE)  # Optional if you prefer rlog
+
+```
+
+## Verify normalization
+```{r}
+# Plot a PCA
+plotPCA(vsd, intgroup = "condition")
+
+# Heatmap: Use the normalized counts or VST-transformed data to generate a heatmap to check for clustering:
+top_var_genes <- head(order(rowVars(assay(vsd)), decreasing = TRUE), 500)
+
+# Check and convert data to numeric if needed
+numeric_data <- as.matrix(apply(assay(vsd)[top_var_genes, ], 2, as.numeric))
+
+# Plot the heatmap with numeric data
+# Ensure required libraries are loaded
+library(pheatmap)
+library(RColorBrewer)
+
+# Compute the distance matrix for samples
+distance <- dist(t(assay(vst_aml)))
+distance_matrix <- as.matrix(distance)
+
+# Ensure the row and column names are properly assigned
+rownames(distance_matrix) <- vst_aml$condition  # Adjust as needed (e.g., sample IDs or conditions)
+colnames(distance_matrix) <- colnames(vst_aml)  # Use sample names if available
+
+# Define color palette for heatmap
+colors <- colorRampPalette(rev(brewer.pal(9, "Reds")))(255)
+
+# Plot the heatmap
+pheatmap(distance_matrix,
+         clustering_distance_rows = distance,
+         clustering_distance_cols = distance,
+         col = colors,
+         main = "Sample Clustering Heatmap")
+
+
+```
+
+
+```{r}
+library(ggplot2)
+ggsave("../figures/heatmap_normalized.png")
+```
+# PCA Plot Interpretation
+1. Variance and Clustering: The PCA plot shows how samples cluster based on their gene expression profiles. In your plot, there are clear groupings where the AML and Healthy samples cluster separately. This indicates that there are distinct expression patterns between the AML and Healthy groups, which is an essential first step to validate the biological differences in your dataset.
+
+2. Principal Components: The first principal component (PC1), which explains 58% of the variance, suggests that the majority of the differences in gene expression can be attributed to the separation between the AML and Healthy samples. PC2, contributing 15% of the variance, provides additional information that might represent other, more subtle differences within the groups.
+
+3. Separation: The clear separation between the AML and Healthy groups supports the notion that these two conditions have distinct transcriptomic profiles, which is expected for comparing disease states with controls.
+
+# Heatmap Interpretation
+1. Clustering Pattern: The heatmap visualizes the hierarchical clustering of samples based on their expression data. The clustering confirms the PCA plot results, showing that the samples group into two main clusters: one for AML and one for Healthy.
+
+2. Distance Metric: The use of color intensity indicates the level of similarity between the samples. Samples within the same condition (AML or Healthy) are more similar to each other, as shown by the darker color blocks along the diagonal within groups.
+
+3. Expression Variability: The heatmap uses VST-transformed data, which normalizes expression levels and helps highlight high-variance genes across samples. The clear separation between the two groups again underscores the differences in gene expression between AML and Healthy individuals.
+
+
+
+## Differential Expression Analysis
+
+# Run DESeq2 Analysis
+```{r}
+library(DESeq2)
+
+# Run the DESeq function to perform differential expression analysis
+dds <- DESeq(dds)
+
+# Obtain results for differential expression analysis
+res <- results(dds)
+
+# Order results by adjusted p-value (FDR)
+resOrdered <- res[order(res$padj), ]
+
+# Print summary of results
+summary(res)
+
+# Filter for significant DEGs
+significant_DEGs <- subset(resOrdered, padj < 0.05 & abs(log2FoldChange) > 2)
+
+# Print the number of significant DEGs found
+print(paste("Number of significant DEGs:", nrow(significant_DEGs)))
+# --- output --- #
+# [1] "Number of significant DEGs: 844"
+```
+
+
+# Visualize Differential Expression Results
+
+MA Plot
+```{r}
+# MA plot to visualize log fold changes
+plotMA(res, ylim = c(-5, 5), main = "MA Plot of DEGs")
+```
+
+Volcano Plot
+```{r}
+# Load ggplot2 for more detailed plotting
+library(ggplot2)
+
+# Create a volcano plot
+volcano_data <- as.data.frame(res)
+volcano_data$significant <- ifelse(volcano_data$padj < 0.05 & abs(volcano_data$log2FoldChange) > 2, "Significant", "Not Significant")
+
+ggplot(volcano_data, aes(x = log2FoldChange, y = -log10(padj), color = significant)) +
+  geom_point(alpha = 0.6) +
+  scale_color_manual(values = c("red", "grey")) +
+  theme_minimal() +
+  ggtitle("Volcano Plot of DEGs") +
+  xlab("Log2 Fold Change") +
+  ylab("-Log10 Adjusted p-value")
+```
+
+# Save DEGs for Functional Analysis
+```{r}
+# Save significant DEGs to a CSV file for further analysis
+write.csv(significant_DEGs, file = "significant_DEGs.csv", row.names = TRUE)
+```
+
+# Functional Annotation and Pathway Analysis (STILL ERROR)
+```{r}
+# Install the org.Hs.eg.db package if not already installed
+if (!requireNamespace("org.Hs.eg.db", quietly = TRUE)) {
+  BiocManager::install("org.Hs.eg.db")
+}
+
+# Load the package
+library(org.Hs.eg.db)
+
+# run the enrichment analysis
+enrich_result <- enrichGO(gene = gene_list, OrgDb = org.Hs.eg.db, keyType = "ENSEMBL", ont = "BP", pAdjustMethod = "BH", pvalueCutoff = 0.05)
+
+print(enrich_result)
+
+enrich_result <- enrichGO(
+  gene = gene_list, 
+  OrgDb = org.Hs.eg.db, 
+  keyType = "ENSEMBL", 
+  ont = "BP", 
+  pAdjustMethod = "BH", 
+  pvalueCutoff = 0.1  # Less stringent cutoff
+)
+
+
+```
+
+
+```{r}

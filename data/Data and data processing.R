@@ -1,99 +1,155 @@
-# DATA Processing
-# data collected from CMap -> LINCS L1000
-# no data pre-processing if the data used is level 5
+# Install and load required packages
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+
+# Install missing Bioconductor packages
+BiocManager::install("DESeq2", force = TRUE)
+BiocManager::install("tximport", force = TRUE)
+BiocManager::install("pheatmap", force = TRUE)
+BiocManager::install("tximportData", force = TRUE)
+
+# Load necessary libraries
+library(DESeq2)
+library(tximport)
+library(pheatmap)
+library(tidyverse)
 
 
-if (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
-BiocManager::install("cmapR")
+# Check if tximport has been loaded correctly
+if ("tximport" %in% loadedNamespaces()) {
+  print("tximport loaded successfully.")
+} else {
+  stop("Failed to load tximport. Please reinstall the package.")
+}
 
 
-# Load the compound metadata file
-compound_metadata <- read.delim("compoundinfo_beta.txt", header = TRUE, sep = "\t")
+# Load metadata from a CSV or tab-delimited file
+metadata <- read.csv("SRP518774_metadata.txt", sep = ",", header = TRUE)
 
-# Check the first few rows to understand the structure
-head(compound_metadata)
+# Print column names to verify structure
+print(colnames(metadata))
 
-# Filter compounds for any drug related to AML (using 'AML' as a keyword)
-aml_compounds <- subset(compound_metadata, grepl("AML", cmap_name, ignore.case=TRUE) | 
-                          grepl("AML", compound_aliases, ignore.case=TRUE))
+# Ensure the 'Run' column matches the folder names
+print(metadata$Run)
 
-# View the filtered compounds
-head(aml_compounds)
+quant_files <- list.files(path = "/Users/putriramadani/Documents/Drug repurposing for AML/data/quants", pattern = "quant.sf", full.names = TRUE, recursive = TRUE)
 
-# Filter for drugs with a specific mechanism of action (e.g., kinase inhibitors)
-kinase_inhibitors <- subset(compound_metadata, grepl("kinase", moa, ignore.case=TRUE))
+# Check if quant files are detected
+print(quant_files)
 
-# View the filtered drugs
-head(kinase_inhibitors)
 
-# Extract the pert_id for the filtered AML-related compounds
-subset_cid <- aml_compounds$pert_id
+sample_names <- basename(dirname(quant_files))
+names(quant_files) <- sample_names
 
-# View the selected perturbagen IDs
-head(subset_cid)
+# Print sample names to check if they match with 'Run'
+print(sample_names)
 
-# Extract the column IDs (cids) from the GCTX file
-gctx_treatment <- "level5_beta_trt_cp_n720216x12328.gctx"
-all_cid <- parse_gctx_ids(gctx_treatment, dim = "col")
+# Filter metadata to include only samples present in the quant files
+metadata_filtered <- metadata[metadata$Run %in% sample_names, ]
+print(nrow(metadata_filtered))  # Check if this matches the number of quant files
 
-# View the first few column IDs
-head(all_cid)
+# Add a 'Condition' column based on 'Sample Name' or other logic
+metadata_filtered$Condition <- ifelse(grepl("HD", metadata_filtered$Sample.Name, ignore.case = TRUE), "Healthy", "AML")
 
-library(cmapR)
-ls("package:cmapR")
+# Print the filtered metadata to verify
+print(metadata_filtered)
 
-# Load only the column metadata (pert_id)
-meta <- read_gctx_meta(gctx_treatment, dim = "col")
+# Prepare coldata for DESeq2
+coldata <- data.frame(
+  row.names = metadata_filtered$Run,
+  condition = metadata_filtered$Condition
+)
 
-# Extract all column IDs (pert_id) from the metadata
-all_cid <- meta$id
-head(all_cid)
+# Print coldata to verify
+print(coldata)
 
-# Find matching cids between your subset and the GCTX file
-matching_cid <- intersect(subset_cid, all_cid)
-# ---- output ---- #
-# [1] "ABY001_A375_XH:BRD-A61304759:0.625:24"
-# [2] "ABY001_A375_XH:BRD-A61304759:0.625:3" 
-# [3] "ABY001_A375_XH:BRD-A61304759:10:24"   
-# [4] "ABY001_A375_XH:BRD-A61304759:10:3"    
-# [5] "ABY001_A375_XH:BRD-A61304759:2.5:24"  
-# [6] "ABY001_A375_XH:BRD-A61304759:2.5:3" 
-# ---------------- #
+# Check if coldata matches quant_files
+if (!all(rownames(coldata) %in% names(quant_files))) {
+  stop("Mismatch between coldata row names and quant file names")
+}
 
-# Check the matched cids
-head(matching_cid)
-# ---- output ---- #
-# character(0)
-# ---------------- #
-# figure out what happened here
+# Import quant.sf files using tximport
+txi <- tximport(quant_files, type = "salmon", txOut = TRUE)
 
 
 
 
+# Print filtered metadata to ensure it has rows
+print("Filtered metadata:")
+print(metadata_filtered)
 
-# Read the treatment file (drug-treated samples)
-#gctx_treatment <- "level5_beta_trt_cp_n720216x12328.gctx"
-#ds_treatment <- parse_gctx(gctx_treatment)
+# Ensure rownames are set properly
+coldata <- data.frame(
+  condition = metadata_filtered$Condition,
+  row.names = metadata_filtered$Run
+)
 
-# Explore the data structure
-#head(ds_treatment@mat)  # View the gene expression matrix
+# Print coldata to verify it has row names
+print("Coldata with row names:")
+print(rownames(coldata))
 
-# Read the control file (untreated samples)
-#gctx_control <- "level5_beta_ctl_n58022x12328.gctx"
-#ds_control <- parse_gctx(gctx_control)
+# Check if coldata matches the quant_files
+if (!all(rownames(coldata) %in% names(quant_files))) {
+  stop("Mismatch between coldata row names and quant file names")
+} else {
+  print("All row names in coldata match the quant file names.")
+}
 
-# Explore the control data
-#head(ds_control@mat)
 
-# Read the compound metadata
-#compound_meta <- read.delim("compoundinfo_beta.txt", header = TRUE, sep = "\t")
 
-# Explore the metadata
-#head(compound_meta)
 
-# Filter compound metadata for AML-related compounds
-#aml_compounds <- subset(compound_meta, grepl("AML", Target_Disease, ignore.case=TRUE))
 
-# Filter the expression data (assuming drug IDs in ds@rid match the compound metadata)
-#aml_expression_data <- ds@mat[ds@rid %in% aml_compounds$pert_id, ]
+
+
+
+
+
+
+
+
+
+
+
+
+# Load necessary libraries
+library(DESeq2)
+library(pheatmap)
+library(ggplot2)
+
+# Proceed with DESeq2 pipeline
+# Create DESeq2 dataset from imported data and coldata
+dds <- DESeqDataSetFromTximport(txi, colData = coldata, design = ~condition)
+
+# Run DESeq2 normalization and differential expression analysis
+dds <- DESeq(dds)
+
+# Variance stabilizing transformation for visualization
+vsd <- vst(dds, blind = FALSE)
+
+# PCA plot to visualize data distribution
+pca_plot <- plotPCA(vsd, intgroup = "condition")
+print(pca_plot)
+
+# Get differential expression results
+res <- results(dds)
+
+# Order results by adjusted p-value
+resOrdered <- res[order(res$padj),]
+
+# Print summary of results
+summary(res)
+
+# Visualize significant DEGs with a volcano plot
+volcano_data <- as.data.frame(res)
+volcano_data$significant <- volcano_data$padj < 0.05 & abs(volcano_data$log2FoldChange) > 1
+ggplot(volcano_data, aes(x = log2FoldChange, y = -log10(padj), color = significant)) +
+  geom_point(alpha = 0.4) +
+  theme_minimal() +
+  scale_color_manual(values = c("grey", "red")) +
+  labs(title = "Volcano Plot of Differential Expression",
+       x = "Log2 Fold Change",
+       y = "-Log10 Adjusted P-Value")
+
+# Generate heatmap of top differentially expressed genes
+top_genes <- head(order(res$padj, na.last = NA), 50)
+pheatmap(assay(vsd)[top_genes, ], cluster_rows = TRUE, show_rownames = TRUE, cluster_cols = TRUE, annotation_col = coldata)
+

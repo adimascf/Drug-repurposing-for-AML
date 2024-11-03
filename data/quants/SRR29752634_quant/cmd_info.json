@@ -1,0 +1,11 @@
+{
+    "salmon_version": "1.10.0",
+    "index": "../DATA/gencode_v47_index/",
+    "libType": "A",
+    "mates1": "../DATA/fastqs/SRR29752634_1.fastq.gz",
+    "mates2": "../DATA/fastqs/SRR29752634_2.fastq.gz",
+    "threads": "8",
+    "validateMappings": [],
+    "output": "../DATA//quants/SRR29752634_quant",
+    "auxDir": "aux_info"
+}
