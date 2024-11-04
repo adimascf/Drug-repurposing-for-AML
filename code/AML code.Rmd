@@ -20,7 +20,7 @@ library(pheatmap)
 Prepare the sample table of the experiment and load quant data generated
 by Salmon into R
 ```{r}
-sample_table <- read_csv("SRP518774_metadata.txt") %>%
+sample_table <- read_csv("../data/SRP518774_metadata.txt") %>%
   filter(`Assay Type` == "RNA-Seq") %>%
   select(`Run`, `isolate`) %>%
   mutate(condition = if_else(str_detect(isolate, "health"), "Control/Healthy", "AML Patient")) %>%
@@ -40,7 +40,7 @@ sample_files <- paste0("../data/quants/", sample_files)
 
 #paste0(sample_files, '_quant/quant.sf')
 
-gene_map <- read_csv('gene_map.csv', 
+gene_map <- read_csv('../data/gene_map.csv', 
                      col_names = c('enstid', 'ensgid'))
 
 names(sample_files) <- pull(sample_table, sample_name)
@@ -274,7 +274,18 @@ plotMA(res, ylim = c(-5, 5), main = "MA Plot of DEGs")
 # minus log2fold change mean
 # blue dots 
 # the smaller mean, the bigger p-adjusted value (to eliminate false positives) 
+
+
+library(ggplot2)
+ggsave("../figures/MAPlot_DEGs.png")
+
 ```
+```{r}
+
+
+
+```
+
 
 Volcano Plot
 ```{r}
@@ -292,6 +303,10 @@ ggplot(volcano_data, aes(x = log2FoldChange, y = -log10(padj), color = significa
   ggtitle("Volcano Plot of DEGs") +
   xlab("Log2 Fold Change") +
   ylab("-Log10 Adjusted p-value")
+
+
+library(ggplot2)
+ggsave("../figures/VolcanoPlot_DEGs.png")
 ```
 
 # Save DEGs for Functional Analysis
