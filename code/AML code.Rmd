@@ -317,38 +317,146 @@ write.csv(significant_DEGs, file = "significant_DEGs.csv", row.names = TRUE)
 
 
 
+## Functional Annotation of DEGs
 
-# Functional Annotation and Pathway Analysis (STILL ERROR)
+# Pathway Analysis
 ```{r}
-
+# NOTE:
 # require annotation using ENSEMBL Biomark, enrich
 # clusterprofiler R package
 # biological process changed in AML bcs of AML, gene list of disturbed metabolisms to select drug target
 
 
-# Install the org.Hs.eg.db package if not already installed
-if (!requireNamespace("org.Hs.eg.db", quietly = TRUE)) {
-  BiocManager::install("org.Hs.eg.db")
-}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
 
-# Load the package
+# Install clusterProfiler and annotation packages
+BiocManager::install("clusterProfiler") # from Yu Lab
+BiocManager::install("org.Hs.eg.db")  # Human annotation database
+BiocManager::install("DOSE")          # For additional analysis options
+
+
+library(clusterProfiler)
 library(org.Hs.eg.db)
+library(DOSE)  # optional for visualizations or disease ontology
 
-# run the enrichment analysis
-enrich_result <- enrichGO(gene = gene_list, OrgDb = org.Hs.eg.db, keyType = "ENSEMBL", ont = "BP", pAdjustMethod = "BH", pvalueCutoff = 0.05)
+# DEG List
+# Extract Enseml IDs
+gene_list <- significant_DEGs$...1  
 
-print(enrich_result)
+library(org.Hs.eg.db)
+entrez_ids <- bitr(gene_list, fromType = "ENSEMBL", toType = "ENTREZID", OrgDb = org.Hs.eg.db)
 
-enrich_result <- enrichGO(
-  gene = gene_list, 
-  OrgDb = org.Hs.eg.db, 
-  keyType = "ENSEMBL", 
-  ont = "BP", 
-  pAdjustMethod = "BH", 
-  pvalueCutoff = 0.1  # Less stringent cutoff
+print(entrez_ids)
+```
+
+# Prepare DEG List for Analysis
+```{r}
+# Extract the Entrez IDs from the conversion result
+gene_list <- entrez_ids$ENTREZID
+gene_list
+```
+
+# Perform Gene Ontology GO (Enrichment Analysis)
+```{r}
+# Load clusterProfiler and perform GO enrichment analysis
+library(clusterProfiler)
+
+go_enrich <- enrichGO(
+    gene         = gene_list,
+    OrgDb        = org.Hs.eg.db,    # Human annotation database
+    keyType      = "ENTREZID",      # Identifier type
+    ont          = "BP",            # Ontology: "BP" for Biological Process, "CC" for Cellular Component, "MF" for Molecular Function
+    pAdjustMethod = "BH",           # p-value adjustment method
+    pvalueCutoff  = 0.05,           # p-value cutoff for significance
+    qvalueCutoff  = 0.2,            # q-value cutoff
+    readable     = TRUE             # Converts Entrez IDs to gene symbols in results
 )
 
+# View the first few results
+head(go_enrich)
+```
 
+# Perform KEGG Pathway Enrichment Analysis
+```{r}
+# Perform KEGG pathway enrichment analysis
+kegg_enrich <- enrichKEGG(
+    gene         = gene_list,
+    organism     = "hsa",  # "hsa" for human
+    pAdjustMethod = "BH",  # Benjamini-Hochberg, a method for controlling the false discovery rate (FDR) when performing multiple hypothesis tests
+    pvalueCutoff  = 0.05,
+    qvalueCutoff  = 0.2
+)
+
+# View the first few results
+head(kegg_enrich)
+```
+
+# Visualize the results
+
+1. GO Enrichment Analysis Result
+```{r}
+# Dot plot for GO enrichment analysis
+library(stringr)
+go_enrich@result$Description <- str_wrap(go_enrich@result$Description, width = 80)
+
+dotplot(go_enrich, showCategory = 20) +
+  ggtitle("GO Enrichment Analysis for DEGs") +
+  xlab("Adjusted P-value") +
+  ylab("GO Terms") +
+  theme(
+    axis.text.y = element_text(size = 8),   # Adjust y-axis font size
+    axis.text.x = element_text(size = 12),   # Adjust x-axis font size
+    plot.title = element_text(size = 14, face = "bold")
+  )
+
+#dotplot(go_enrich, showCategory = 20) +
+ # theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 10))
+
+  
+library(ggplot2)
+ggsave("../figures/GO_enrichment_analysis.png", width = 12, height = 10, dpi = 300)
+
+```
+
+2. KEGG Pathway Analysis Result
+```{r}
+# Bar plot for KEGG pathway analysis
+barplot(kegg_enrich, showCategory = 20) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 10),
+    plot.title = element_text(size = 14),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12)
+  )
+library(ggplot2)
+
+
+ggsave("../figures/KEGG_pathway_analysis.png", width = 12, height = 8, dpi = 300)
+```
+
+3. Enrichment Map Result
+```{r}
+# Enrichment map (optional)
+if (!requireNamespace("enrichplot", quietly = TRUE))
+    install.packages("enrichplot")
+
+library(enrichplot)
+
+# Calculate the term similarity matrix
+go_enrich <- pairwise_termsim(go_enrich)
+
+# Create the enrichment map plot
+emapplot(go_enrich, showCategory = 25, cex_label_category = 1.5, repel = TRUE, layout = "fr") 
+
+# "fr" Fruchterman-Reingold algorithm helps create a more spaced-out, visually appealing graph, especially useful when you have many terms or nodes to display.
+  
+  
+
+library(ggplot2)
+ggsave("../figures/Enrichment_map.png", width = 20, height = 14, dpi = 300)
 ```
 
 
