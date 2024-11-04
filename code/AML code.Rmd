@@ -322,9 +322,9 @@ write.csv(significant_DEGs, file = "significant_DEGs.csv", row.names = TRUE)
 # Pathway Analysis
 ```{r}
 # NOTE:
-# require annotation using ENSEMBL Biomark, enrich
-# clusterprofiler R package
-# biological process changed in AML bcs of AML, gene list of disturbed metabolisms to select drug target
+# Require annotation using ENSEMBL Biomark, enrich
+# ClusterProfiler R package
+# Biological process changed in AML bcs of AML, gene list of disturbed metabolisms to select drug target
 
 
 if (!require("BiocManager", quietly = TRUE))
