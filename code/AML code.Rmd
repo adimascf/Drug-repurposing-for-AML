@@ -722,5 +722,24 @@ write.csv(approved_drugs, "approved_drugs.csv", row.names = FALSE)
 
 
 
+A list of genes per drug
+```{r}
+
+library(dplyr)
+
+# Group by drug and create a list of genes targeted by each drug
+genes_per_drug <- dgidb_data %>%
+    group_by(drug) %>%
+    summarise(Targeted_Genes = paste(unique(gene), collapse = ", "))
+
+print(genes_per_drug)
+
+# Save the result to a CSV file 
+write.csv(genes_per_drug, "genes_per_drug.csv", row.names = FALSE)
+
+
+```
+
+
 
 
