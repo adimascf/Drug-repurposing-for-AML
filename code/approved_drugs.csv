@@ -1,0 +1,280 @@
+"gene","drug","regulatory.approval","indication","interaction.score"
+"ifngr2","INTERFERON GAMMA-1B","Approved","antiosteoporotic agent",105.015342471389
+"il5ra","BENRALIZUMAB","Approved","antiasthmatic agent",52.5076712356945
+"tslp","TEZEPELUMAB","Approved","",52.5076712356945
+"tnfsf11","DENOSUMAB","Approved","antiosteoporotic agent",43.7563926964121
+"csf2rb","SARGRAMOSTIM","Approved","for treatment of Chron's disease,for treatment of leukopenia",13.1269178089236
+"ccr4","MOGAMULIZUMAB","Approved","",12.3547461731046
+"il6r","SARILUMAB","Approved","",12.1171549005449
+"csf2ra","SARGRAMOSTIM","Approved","for treatment of Chron's disease,for treatment of leukopenia",11.6683713857099
+"ghr","PEGVISOMANT","Approved","for treatment of acromegaly",10.5015342471389
+"gng4","MOXETUMOMAB PASUDOTOX","Approved","",8.75127853928242
+"csf3","EFBEMALENOGRASTIM ALFA","Approved","",8.75127853928242
+"itgb7","VEDOLIZUMAB","Approved","for treatment of ulcerative colitis,for treatment of Chron's disease",8.75127853928242
+"il4r","DUPILUMAB","Approved","",8.75127853928242
+"vwf","CAPLACIZUMAB-YHDP","Approved","antithrombotic",8.29068493195176
+"il17f","BIMEKIZUMAB","Approved","",7.5010958908135
+"gng4","INOTUZUMAB OZOGAMICIN","Approved","antineoplastic agent",6.56345890446181
+"il13","TRALOKINUMAB","Approved","antiasthmatic agent",6.56345890446181
+"comp","TADALAFIL","Approved","for treatment of erectile dysfunction",6.56345890446181
+"il1r2","ANAKINRA","Approved","DMARD,antiinflammatory agent",5.83418569285494
+"itga4","NATALIZUMAB","Approved","for treatment of Crohn's disease,antiinflammatory agent",5.83418569285494
+"itga4","VEDOLIZUMAB","Approved","for treatment of ulcerative colitis,for treatment of Chron's disease",5.83418569285494
+"il6r","SATRALIZUMAB","Approved","",5.38540217801995
+"ghr","SOMAPACITAN","Approved","",5.25076712356945
+"ghr","SOMATROGON","Approved","",5.25076712356945
+"ghr","LONAPEGSOMATROPIN","Approved","",5.25076712356945
+"ghr","SOMATREM","Approved","",5.25076712356945
+"ltb","ABACAVIR","Approved","",4.77342465779041
+"mpl","AVATROMBOPAG MALEATE","Approved","",4.77342465779041
+"il12rb1","DENILEUKIN DIFTITOX","Approved","antineoplastic agent",4.37563926964121
+"bmp2","BUTAMBEN","Approved","",4.37563926964121
+"il12rb2","DENILEUKIN DIFTITOX","Approved","antineoplastic agent",4.37563926964121
+"ifnb1","PEGINTERFERON BETA-1A","Approved","",4.37563926964121
+"csf3","EFLAPEGRASTIM","Approved","",4.37563926964121
+"cxcl12","ALEMTUZUMAB","Approved","antineoplastic agent",4.37563926964121
+"ngfr","CENEGERMIN-BKBJ","Approved","",4.37563926964121
+"igf1","TROFINETIDE","Approved","neuroprotectant",4.37563926964121
+"csf3r","PEGFILGRASTIM-JMDB","Approved","Antineutropenic Agents,for treatment of neutropenia",4.03905163351496
+"csf3r","TBO-FILGRASTIM","Approved","for treatment of neutropenia",4.03905163351496
+"il6r","TOCILIZUMAB","Approved","DMARD,antiinflammatory agent",4.03905163351496
+"ccr5","MARAVIROC","Approved","HIV,antiviral agent",3.93807534267709
+"il17f","ALUM, POTASSIUM","Approved","",3.75054794540675
+"csh2","BENSERAZIDE","Approved","",3.75054794540675
+"itga2b","ABCIXIMAB","Approved","anticoagulant",3.64636605803434
+"itga2b","EPTIFIBATIDE","Approved","antiplatelet agent",3.50051141571297
+"itga2b","TIROFIBAN","Approved","Platelet Aggregation Inhibitors",3.50051141571297
+"il3ra","TAGRAXOFUSP-ERZS","Approved","",3.50051141571297
+"il1a","RILONACEPT","Approved","DMARD,antiinflammatory agent",3.50051141571297
+"il23a","GUSELKUMAB","Approved","",3.28172945223091
+"il23a","RISANKIZUMAB","Approved","",3.28172945223091
+"ccl4","CLODRONIC ACID","Approved","antineoplastic agent",3.18228310519361
+"mpl","LUSUTROMBOPAG","Approved","",3.1822831051936
+"cish","EPOETIN ALFA","Approved","for treatment of anemia,Antianemic Agents,for treatment of stroke,erythropoietic agent",3.08868654327615
+"tcl1a","EXEMESTANE","Approved","antineoplastic agent",3.08868654327615
+"syk","FOSTAMATINIB","Approved","DMARD,antiinflammatory agent",3.0004383563254
+"syk","FOSTAMATINIB DISODIUM","Approved","",3.0004383563254
+"mpl","ROMIPLOSTIM","Approved","for treatment of thrombocytopenia",2.983390411119
+"mpl","ELTROMBOPAG","Approved","thrombopoietic",2.983390411119
+"csf2rb","TAGRAXOFUSP-ERZS","Approved","",2.91709284642747
+"csf2ra","TALIMOGENE LAHERPAREPVEC","Approved","antineoplastic agent",2.91709284642747
+"ngfr","VOCLOSPORIN","Approved","immunosuppressant,DMARD,antiinflammatory agent",2.91709284642747
+"tnfrsf17","IDECABTAGENE VICLEUCEL","Approved","",2.76356164398392
+"ccl5","FLUTICASONE","Approved","glucocorticoid,antiinflammatory agent,for treatment of symptomatic exophthalmos associated with thyroid-related eye disease,bronchodilator",2.76356164398392
+"vwf","VONICOG ALFA","Approved","",2.76356164398392
+"il1b","CANAKINUMAB","Approved","DMARD,antiinflammatory agent",2.57390545273012
+"cd19","AXICABTAGENE CILOLEUCEL","Approved","",2.56134981637534
+"tnfrsf11a","DENOSUMAB","Approved","antiosteoporotic agent",2.50036529693783
+"lta","ABACAVIR","Approved","",2.3867123288952
+"itga2b","TIROFIBAN HYDROCHLORIDE","Approved","",2.1878196348206
+"itga2b","ENOXAPARIN SODIUM","Approved","anticoagulant",2.1878196348206
+"il23a","TILDRAKIZUMAB","Approved","",2.1878196348206
+"il23a","MIRIKIZUMAB","Approved","",2.1878196348206
+"itgb7","NATALIZUMAB","Approved","for treatment of Crohn's disease,antiinflammatory agent",2.1878196348206
+"pdgfra","OLARATUMAB","Approved","antineoplastic agent",2.15195373916781
+"il1b","PENTAMIDINE","Approved","",2.0591243621841
+"mpl","AVATROMBOPAG","Approved","",2.04575342476732
+"tnfsf11","LENALIDOMIDE","Approved","antineoplastic agent",2.01952581675748
+"csf3r","LIPEGFILGRASTIM","Approved","",2.01952581675748
+"f2r","VORAPAXAR SULFATE","Approved","",2.01952581675748
+"hgf","GONADOTROPIN, CHORIONIC","Approved","",1.94472856428498
+"cd19","TISAGENLECLEUCEL","Approved","",1.92101236228151
+"kit","AVAPRITINIB","Approved","",1.8978676350251
+"cd27","BENZTROPINE","Approved","Antiparkinson Agents",1.87527397270337
+"tgfb2","LUSPATERCEPT-AAMT","Approved","",1.87527397270337
+"ifng","FUMARIC ACID","Approved","",1.87527397270337
+"ccl18","BESIFLOXACIN HYDROCHLORIDE","Approved","",1.81060935295498
+"ccl18","FINAFLOXACIN","Approved","",1.81060935295498
+"ccl18","DELAFLOXACIN MEGLUMINE","Approved","",1.81060935295498
+"ccl18","CIPROFLOXACIN HYDROCHLORIDE","Approved","",1.81060935295498
+"ccl18","GREPAFLOXACIN HYDROCHLORIDE","Approved","",1.81060935295498
+"ccl18","GEMIFLOXACIN MESYLATE","Approved","",1.81060935295498
+"ccl18","ALATROFLOXACIN MESYLATE","Approved","",1.81060935295498
+"ccl18","OZENOXACIN","Approved","",1.81060935295498
+"socs1","ALDESLEUKIN","Approved","antineoplastic agent",1.75025570785648
+"col9a3","MILRINONE","Approved","Cardiotonic Agents; Vasodilator Agents",1.75025570785648
+"lamb3","FENTANYL CITRATE","Approved","adjuvant to anesthesia,opioid,analgesic",1.75025570785648
+"il2ra","BASILIXIMAB","Approved","immunomodulatory agent",1.71593696848675
+"il23a","USTEKINUMAB","Approved","DMARD,antiinflammatory agent,Antipsoriatic Agents",1.64086472611545
+"il2","IMIPENEM ANHYDROUS","Approved","",1.64086472611545
+"il2","CEFEPIME","Approved","",1.64086472611545
+"il6r","BAZEDOXIFENE","Approved","antiosteoporotic agent",1.61562065340598
+"kit","RIPRETINIB","Approved","",1.51829410802008
+"insr","INSULIN GLULISINE, HUMAN","Approved","antidiabetic",1.5002191781627
+"insr","INSULIN, REGULAR, PORK","Approved","",1.5002191781627
+"insr","INSULIN GLARGINE-YFGN","Approved","antidiabetic",1.5002191781627
+"insr","INSULIN DETEMIR","Approved","antidiabetic",1.5002191781627
+"insr","INSULIN ASPART PROTAMINE, HUMAN","Approved","antidiabetic",1.5002191781627
+"met","CAPMATINIB","Approved","",1.5002191781627
+"il1rn","DIACETYLRHEIN","Approved","antidiabetic",1.45854642321374
+"csf2","FAMCICLOVIR","Approved","",1.40020456628519
+"ghr","SOMATROPIN (RECOMBINANT DNA ORIGIN)","Approved","hormone replacement,for treatment of spinal muscular atrophy,For treatment of growth disorders,growth hormone replacement therapy",1.40020456628519
+"lama3","OCRIPLASMIN","Approved","",1.38178082199196
+"lif","CLOMIPHENE CITRATE","Approved","",1.38178082199196
+"lamb2","OCRIPLASMIN","Approved","",1.38178082199196
+"lama5","OCRIPLASMIN","Approved","",1.38178082199196
+"ntrk2","LAROTRECTINIB","Approved","",1.36738727176288
+"tnfrsf11a","PAMIDRONATE","Approved","Bisphosphonates",1.36383561651155
+"il2rb","DENILEUKIN DIFTITOX","Approved","antineoplastic agent",1.34635054450499
+"il2rb","BASILIXIMAB","Approved","immunomodulatory agent",1.34635054450499
+"f2r","ARGATROBAN","Approved","anticoagulant",1.34635054450499
+"cxcl12","CHLORAMBUCIL","Approved","",1.31269178089236
+"csf3r","RUXOLITINIB","Approved","antiinflammatory agent,antineoplastic agent",1.30675199907837
+"cd19","LONCASTUXIMAB TESIRINE","Approved","",1.28067490818767
+"cd19","INEBILIZUMAB-CDON","Approved","",1.28067490818767
+"cd19","BREXUCABTAGENE AUTOLEUCEL","Approved","",1.28067490818767
+"cd19","LISOCABTAGENE MARALEUCEL","Approved","",1.28067490818767
+"tnfrsf8","BRENTUXIMAB VEDOTIN","Approved","antineoplastic agent",1.27622812031202
+"egfr","AFATINIB","Approved","antineoplastic agent",1.18438356170739
+"spp1","CALCITONIN","Approved","antiosteoporotic agent",1.16683713857099
+"fgf2","PENTOSAN POLYSULFATE","Approved","for symptomatic treatment of bladder pain or discomfort associated with interstitial cystitis",1.13530099969069
+"ccl3","INFLIXIMAB-DYYB","Approved","DMARD,antiinflammatory agent",1.12919723087515
+"il23r","INFLIXIMAB-DYYB","Approved","DMARD,antiinflammatory agent",1.12919723087515
+"tcl1a","ESTRADIOL VALERATE","Approved","for treatment of menopausal symptoms,contraceptive,treatment for menopause,hormone replacement",1.11718449437648
+"egfr","MOBOCERTINIB","Approved","",1.1112734653057
+"il11","ALENDRONATE SODIUM","Approved","Bisphosphonates",1.0939098174103
+"tnfrsf8","TAFASITAMAB","Approved","antineoplastic agent",1.0939098174103
+"gh1","DOCOSANOL","Approved","",1.0939098174103
+"il21r","PEGINTERFERON ALFA-2B","Approved","",1.0939098174103
+"pdgfc","SUNITINIB","Approved","antineoplastic agent",1.07158512725907
+"flt3","QUIZARTINIB","Approved","antineoplastic agent",1.0406003721174
+"il2ra","DACLIZUMAB","Approved","immunosuppressant",1.02956218109205
+"ccl4","EPOETIN ALFA","Approved","for treatment of anemia,Antianemic Agents,for treatment of stroke,erythropoietic agent",1.02956218109205
+"crlf2","RUXOLITINIB","Approved","antiinflammatory agent,antineoplastic agent",1.02956218109205
+"il1b","GLUCOSAMINE","Approved","",1.02956218109205
+"kit","IMATINIB","Approved","antineoplastic agent",1.02906600654694
+"tnfrsf1b","INFLIXIMAB-DYYB","Approved","DMARD,antiinflammatory agent",1.01627750778763
+"csf3r","EFLAPEGRASTIM","Approved","",1.00976290837874
+"il2rb","DACLIZUMAB","Approved","immunosuppressant",1.00976290837874
+"f2r","VORAPAXAR","Approved","cardiovascular agent",1.00976290837874
+"f2r","DESIRUDIN","Approved","antithrombotic",1.00976290837874
+"cd70","METOLAZONE","Approved","Antihypertensive Agents; Diuretics",1.00976290837874
+"tnfrsf11a","ZOLEDRONIC ACID ANHYDROUS","Approved","antiosteoporotic agent",1.00014611877513
+"socs1","INSULIN, REGULAR, HUMAN","Approved","for treatment of diabetic foot ulcers,antidiabetic",0.990710778031972
+"ifng","PEFLOXACIN","Approved","",0.937636986351688
+"col6a1","COLLAGENASE CLOSTRIDIUM HISTOLYTICUM-AAES","Approved","for treatment of Dupuytren's contracture",0.937636986351687
+"il11","ETIDRONIC ACID","Approved","",0.937636986351687
+"col4a5","COLLAGENASE CLOSTRIDIUM HISTOLYTICUM-AAES","Approved","for treatment of Dupuytren's contracture",0.937636986351687
+"col6a5","COLLAGENASE CLOSTRIDIUM HISTOLYTICUM-AAES","Approved","for treatment of Dupuytren's contracture",0.937636986351687
+"col6a6","COLLAGENASE CLOSTRIDIUM HISTOLYTICUM-AAES","Approved","for treatment of Dupuytren's contracture",0.937636986351687
+"ereg","HUMAN CHORIONIC GONADOTROPIN","Approved","",0.921187214661307
+"il21r","RIBAVIRIN","Approved","",0.921187214661307
+"il23r","AZATHIOPRINE","Approved","",0.921187214661307
+"vwf","VITAMIN B6","Approved","",0.921187214661307
+"socs3","PEGINTERFERON ALFA-2A","Approved","for treatment of hepatitis B and C,Antineoplastic Agents; Immunomodulatory Agents",0.905304676477491
+"stat4","ALDESLEUKIN","Approved","antineoplastic agent",0.875127853928242
+"stat4","USTEKINUMAB","Approved","DMARD,antiinflammatory agent,Antipsoriatic Agents",0.875127853928242
+"ifnb1","INTERFERON BETA-1A","Approved","antineoplastic agent,for treatment of multiple sclerosis",0.875127853928242
+"il10","ACYCLOVIR","Approved","",0.875127853928242
+"angpt2","FARICIMAB","Approved","",0.875127853928242
+"met","TEPOTINIB","Approved","",0.875127853928242
+"pdgfra","BECAPLERMIN","Approved","for treatment of diabetic foot ulcers",0.860781495667123
+"il2ra","DENILEUKIN DIFTITOX","Approved","antineoplastic agent",0.857968484243374
+"cd19","TAFASITAMAB","Approved","antineoplastic agent",0.853783272125114
+"bdnf","VERTEPORFIN","Approved","",0.853783272125114
+"f2r","THROMBIN","Approved","topical tissue sealant,for treatment of hemophilia B,coagulant",0.841469090315617
+"ccnd2","DECITABINE","Approved","antineoplastic agent",0.840122739771112
+"cx3cl1","ATEZOLIZUMAB","Approved","",0.833455098979278
+"lpar4","VENETOCLAX","Approved","",0.833455098979278
+"itga5","DIMETHYL SULFOXIDE","Approved","",0.820432363057726
+"socs3","PEGINTERFERON ALFA-2B","Approved","",0.820432363057726
+"il1rn","HEPARIN","Approved","for treatment of cystic fibrosis,for treatment of pelvic pain of bladder origin and interstitital cystitis,antithrombotic,anticoagulant",0.820432363057726
+"tnfrsf1b","STAVUDINE","Approved","",0.807810326702992
+"gnb3","TELMISARTAN","Approved","antihypertensive agent",0.795570776298402
+"gnb3","SILDENAFIL","Approved","antihypertensive agent,for treatment of erectile dysfucntion,for treatment of erectile dysfunction",0.795570776298402
+"spp1","CHONDROITIN SULFATES","Approved","",0.777891425713993
+"tlr4","NELFINAVIR","Approved","",0.760980742546297
+"ccr2","PLERIXAFOR","Approved","antineoplastic agent",0.760980742546297
+"il17f","USTEKINUMAB","Approved","DMARD,antiinflammatory agent,Antipsoriatic Agents",0.75010958908135
+"insr","INSULIN ZINC SUSP SEMISYNTHETIC PURIFIED HUMAN","Approved","",0.75010958908135
+"insr","INSULIN ASPART PROTAMINE RECOMBINANT","Approved","",0.75010958908135
+"insr","INSULIN ZINC SUSP BEEF","Approved","",0.75010958908135
+"insr","INSULIN, ISOPHANE","Approved","",0.75010958908135
+"insr","INSULIN ZINC SUSP PROMPT PURIFIED PORK","Approved","",0.75010958908135
+"insr","INSULIN ZINC SUSP EXTENDED PURIFIED BEEF","Approved","",0.75010958908135
+"insr","INSULIN SUSP ISOPHANE PURIFIED PORK","Approved","",0.75010958908135
+"insr","INSULIN SUSP PROTAMINE ZINC PURIFIED PORK","Approved","",0.75010958908135
+"insr","INSULIN [INJECTION], BIPHASIC","Approved","",0.75010958908135
+"insr","INSULIN PURIFIED BEEF","Approved","",0.75010958908135
+"insr","INSULIN ZINC, PROMPT","Approved","",0.75010958908135
+"insr","INSULIN SUSP ISOPHANE BEEF/PORK","Approved","",0.75010958908135
+"insr","INSULIN SUSP PROTAMINE ZINC PURIFIED BEEF","Approved","",0.75010958908135
+"insr","INSULIN ZINC, EXTENDED","Approved","",0.75010958908135
+"insr","INSULIN PURIFIED PORK","Approved","",0.75010958908135
+"insr","INSULIN LISPRO PROTAMINE RECOMBINANT","Approved","",0.75010958908135
+"insr","INSULIN ZINC SUSP PURIFIED BEEF/PORK","Approved","",0.75010958908135
+"insr","INSULIN, PROTAMINE ZINC","Approved","",0.75010958908135
+"insr","INSULIN LISPRO-AABC","Approved","",0.75010958908135
+"insr","INSULIN SUSP ISOPHANE PURIFIED BEEF","Approved","",0.75010958908135
+"insr","INSULIN ZINC SUSP PURIFIED PORK","Approved","",0.75010958908135
+"insr","INSULIN ZINC SUSP PROMPT BEEF","Approved","",0.75010958908135
+"insr","INSULIN ZINC SUSP EXTENDED RECOMBINANT HUMAN","Approved","",0.75010958908135
+"insr","INSULIN SUSP ISOPHANE SEMISYNTHETIC PURIFIED HUMAN","Approved","",0.75010958908135
+"insr","INSULIN ZINC SUSP PURIFIED BEEF","Approved","",0.75010958908135
+"insr","INSULIN SUSP ISOPHANE BEEF","Approved","",0.75010958908135
+"insr","INSULIN ZINC SUSP EXTENDED BEEF","Approved","",0.75010958908135
+"col9a3","CILOSTAZOL","Approved","Platelet Aggregation Inhibitors",0.75010958908135
+"ccr5","GLATIRAMER","Approved","",0.75010958908135
+"tnfrsf1b","DIDANOSINE","Approved","",0.75010958908135
+"gnb3","TORSEMIDE","Approved","Antihypertensive Agents; Diuretics",0.729273211606868
+"prl","DEXAMETHASONE ACETATE","Approved","",0.729273211606868
+"prl","HYPOXIS HEMEROCALLIDEA ROOT EXTRACT","Approved","",0.729273211606868
+"prl","BENZNIDAZOLE","Approved","",0.729273211606868
+"igf2","GLUTAMINE","Approved","",0.729273211606868
+"egfr","NECITUMUMAB","Approved","antineoplastic agent",0.694545915816065
+"col6a1","OCRIPLASMIN","Approved","",0.69089041099598
+"tnfrsf17","ELRANATAMAB","Approved","",0.69089041099598
+"tnfrsf17","TECLISTAMAB-CQYV","Approved","",0.69089041099598
+"vwf","VON WILLEBRAND FACTOR","Approved","for treatment of hemophilia A,coagulant",0.69089041099598
+"col4a5","OCRIPLASMIN","Approved","",0.69089041099598
+"col6a5","OCRIPLASMIN","Approved","",0.69089041099598
+"socs3","RIBAVIRIN","Approved","",0.69089041099598
+"lamb3","OCRIPLASMIN","Approved","",0.69089041099598
+"col6a6","OCRIPLASMIN","Approved","",0.69089041099598
+"pdgfra","AVAPRITINIB","Approved","",0.688625196533698
+"il1b","THYROGLOBULIN","Approved","",0.686374787394699
+"il1b","RILONACEPT","Approved","DMARD,antiinflammatory agent",0.686374787394699
+"il1b","TILUDRONIC ACID","Approved","Bisphosphonates",0.686374787394699
+"kit","NILOTINIB","Approved","antineoplastic agent",0.67216145407139
+"egfr","CETUXIMAB","Approved","antineoplastic agent",0.64824285476166
+"spp1","PAMIDRONATE","Approved","Bisphosphonates",0.636456621038721
+"amh","TESTOSTERONE","Approved","for treatment of female sexual dysfunction,hormone replacement",0.633576726825876
+"kit","QUIZARTINIB","Approved","antineoplastic agent",0.632622545008367
+"col1a2","COLLAGENASE CLOSTRIDIUM HISTOLYTICUM-AAES","Approved","for treatment of Dupuytren's contracture",0.625091324234458
+"col4a2","COLLAGENASE CLOSTRIDIUM HISTOLYTICUM-AAES","Approved","for treatment of Dupuytren's contracture",0.625091324234458
+"col6a2","COLLAGENASE CLOSTRIDIUM HISTOLYTICUM-AAES","Approved","for treatment of Dupuytren's contracture",0.625091324234458
+"tnfrsf1b","ETANERCEPT-SZZS","Approved","DMARD,antiinflammatory agent",0.605857745027244
+"ccl18","ENOXACIN","Approved","",0.603536450984994
+"ccl18","TROVAFLOXACIN MESYLATE","Approved","",0.603536450984994
+"ccl18","SPARFLOXACIN","Approved","",0.603536450984994
+"egfr","DACOMITINIB ANHYDROUS","Approved","antineoplastic agent",0.601939793707256
+"ccnd2","RIBOCICLIB","Approved","antineoplastic agent",0.583418569285495
+"il10","ROFECOXIB","Approved","NSAID",0.583418569285495
+"igf2","BETAMETHASONE","Approved","glucocorticoid,antiinflammatory agent",0.583418569285495
+"il1a","HYDROXYCHLOROQUINE","Approved","antirheumatic agent",0.583418569285495
+"f2r","TINZAPARIN SODIUM","Approved","Anticoagulants,anticoagulant",0.577007376216423
+"cd70","CHLOROTHIAZIDE","Approved","Antihypertensive Agents; Diuretics",0.577007376216423
+"fgf2","THYROTROPIN","Approved","",0.567650499845346
+"flt3","MIDOSTAURIN","Approved","antineoplastic agent",0.567212497916453
+"il11","CITALOPRAM","Approved","antidepressant,Second-Generation,Antidepressive Agents",0.562582191811013
+"ccnd2","ABEMACICLIB","Approved","",0.552712328796784
+"col9a3","INAMRINONE","Approved","Cardiotonic Agents; Phosphodiesterase Inhibitors",0.552712328796784
+"egfr","ERLOTINIB","Approved","antineoplastic agent",0.550927946782912
+"itga2b","THROMBIN","Approved","topical tissue sealant,for treatment of hemophilia B,coagulant",0.546954908705151
+"il2","BCG VACCINE","Approved","",0.546954908705151
+"il2","DIETHYLSTILBESTROL DIPHOSPHATE","Approved","",0.546954908705151
+"pdgfd","SUNITINIB","Approved","antineoplastic agent",0.535792563629536
+"ifng","AMIKACIN","Approved","",0.535792563629536
+"lta","CARBAMAZEPINE","Approved","for treatment of bipolar disorder",0.535792563629536
+"areg","PANITUMUMAB","Approved","antineoplastic agent",0.525076712356945
+"tnfrsf1b","USTEKINUMAB","Approved","DMARD,antiinflammatory agent,Antipsoriatic Agents",0.525076712356945
+"angpt1","AFAMELANOTIDE","Approved","dermatological agent",0.525076712356945
+"il23r","CELECOXIB","Approved","NSAID",0.52246439040492
+"cd40lg","MUROMONAB-CD3","Approved","Immunosuppressive Agents",0.517316957987138
+"pdgfra","RIPRETINIB","Approved","",0.516468897400274
+"cxcl2","DEFEROXAMINE","Approved","",0.514781090546025
+"il1b","ECHINACEA PREPARATION","Approved","",0.514781090546025
+"cd19","BLINATUMOMAB","Approved","antineoplastic agent",0.512269963275068
+"tlr4","SAQUINAVIR","Approved","",0.507320495030865
+"met","TEPOTINIB HYDROCHLORIDE","Approved","",0.500073059387567
+"met","CAPMATINIB HYDROCHLORIDE","Approved","",0.500073059387567

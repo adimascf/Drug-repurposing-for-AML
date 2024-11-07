@@ -459,5 +459,268 @@ library(ggplot2)
 ggsave("../figures/Enrichment_map.png", width = 20, height = 14, dpi = 300)
 ```
 
+DRUG REPURPOSING
+1. Analyzing Differentially Expressed Genes (DEGs)
+1.1 Filter DEGs based on significance criteria
+```{r}
+# `res` is the DESeq2 results object
+significant_DEGs <- res[which(res$padj < 0.05 & abs(res$log2FoldChange) > 2), ]
+
+# A common threshold is adjusted p-value < 0.05, meaning only genes with strong statistical evidence are retained.
+# A threshold of log2 fold change > ±2 is often used to focus on genes with biologically meaningful differences in expression.
+
+# Convert to data frame and sort by log2 fold change
+significant_DEGs_df <- as.data.frame(significant_DEGs)
+significant_DEGs_df <- significant_DEGs_df[order(significant_DEGs_df$log2FoldChange, decreasing = TRUE), ]
+
+# View the top results
+head(significant_DEGs_df)
+
+# convert significant_DEGs to a data frame and sort by log2 fold change to see the top upregulated and downregulated genes.
+significant_DEGs_df <- as.data.frame(significant_DEGs)
+significant_DEGs_df <- significant_DEGs_df[order(significant_DEGs_df$log2FoldChange, decreasing = TRUE), ]
+
+# View the top results
+head(significant_DEGs_df)
+
+cat("Number of significant DEGs: ", nrow(significant_DEGs_df), "\n")
+# output: Number of significant DEGs:  8112 
+```
+
+1.2 Inspect Top Upregulated and Downregulated Genes
+Upregulated genes might include potential oncogenes, 
+while downregulated genes may reveal suppressed tumor suppressor pathways.
+```{r}
+## Extract upregulated and downregulated genes:
+# Upregulated genes (positive log2 fold change)
+upregulated_genes <- significant_DEGs_df[significant_DEGs_df$log2FoldChange > 0, ]
+
+# Downregulated genes (negative log2 fold change)
+downregulated_genes <- significant_DEGs_df[significant_DEGs_df$log2FoldChange < 0, ]
+
+## View top genes
+# view the top 10 upregulated and downregulated genes to gain insights into specific genes that might play roles in AML.
+# Top 10 Upregulated Genes
+cat("Top 10 Upregulated Genes:\n")
+head(upregulated_genes, 10)
+
+# Top 10 Downregulated Genes
+cat("Top 10 Downregulated Genes:\n")
+head(downregulated_genes, 10)
+
+# Plot histogram of log2 fold changes
+# to visualize the spread of gene expression differences between AML and healthy samples.
+hist(significant_DEGs_df$log2FoldChange, breaks = 50, col = "skyblue",
+     main = "Log2 Fold Change Distribution", xlab = "Log2 Fold Change")
+```
+
+Filter and Prioritize Genes Based on Relevance to AML
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(magrittr)
+
+# Convert to data frame if not already
+significant_DEGs_df <- as.data.frame(significant_DEGs)
+
+# Move rownames (gene IDs) to a new column called 'gene_name'
+significant_DEGs_df <- significant_DEGs_df %>%
+  dplyr::mutate(gene_name = rownames(significant_DEGs_df)) %>%
+  dplyr::select(gene_name, log2FoldChange, padj)
+
+# Filter for top DEGs with |log2FoldChange| > 2
+top_DEGs_summary <- significant_DEGs_df %>%
+  dplyr::filter(log2FoldChange > 2 | log2FoldChange < -2)
+
+# Print the summary table
+print(top_DEGs_summary)
+
+```
+
+Identify Potential Target Genes
+```{r}
+# Load necessary libraries
+if (!requireNamespace("clusterProfiler", quietly = TRUE)) {
+    install.packages("clusterProfiler")
+}
+library(clusterProfiler)
+
+# Ensure that you have your organism database loaded, for instance, org.Hs.eg.db for human
+if (!requireNamespace("org.Hs.eg.db", quietly = TRUE)) {
+    BiocManager::install("org.Hs.eg.db")
+}
+library(org.Hs.eg.db)
+
+# Assuming `gene_list` contains your significant DEGs in ENTREZ ID format
+enrich_kegg_results <- enrichKEGG(gene = gene_list, organism = "hsa", pvalueCutoff = 0.05)
+
+```
+
+Pathway and Network Analysis
+```{r}
+kegg_df <- as.data.frame(enrich_kegg_results)
+#head(kegg_df)  # View the top rows to inspect the enrichment results
+
+# Filter for specific pathways
+target_pathways <- kegg_df %>%
+    filter(Description %in% c("PI3K-Akt signaling pathway", "JAK-STAT signaling pathway", "Cytokine-cytokine receptor interaction"))
+print(target_pathways)
+
+
+```
+```{r}
+pathway_genes <- target_pathways %>%
+   pull(geneID) %>%
+   strsplit("/") %>%
+   unlist() %>%
+   unique()  # Remove duplicates
+
+print(pathway_genes)
+
+```
+
+Convert Gene IDs to Gene Symbols (if needed)
+Some drug-gene databases, like DGIdb, may require gene symbols instead of KEGG IDs. Use a conversion tool if your gene IDs are in KEGG format.
+```{r}
+library(org.Hs.eg.db)
+pathway_genes_symbols <- mapIds(org.Hs.eg.db, keys = pathway_genes,
+                                column = "SYMBOL", keytype = "ENTREZID", multiVals = "first")
+pathway_genes_symbols <- na.omit(pathway_genes_symbols)  # Remove any NAs
+print(pathway_genes_symbols)
+```
+
 
 ```{r}
+# Export gene symbols to a CSV file for manual upload
+write.csv(data.frame(GeneSymbol = pathway_genes_symbols), "pathway_genes_symbols.csv", row.names = FALSE)
+
+```
+
+
+
+
+Filter gene list from DGIdb by Interaction Type (do we use this/no?)
+```{r}
+# Load necessary libraries
+library(dplyr)
+
+list.files(recursive = TRUE)
+
+# Read in the DGIdb data
+dgidb_data <- read.delim("gene_interaction_results-11_6_2024.tsv", sep = "\t")
+head(dgidb_data)
+
+
+# View column names
+colnames(dgidb_data)
+# View the first few rows of the data
+head(dgidb_data)
+
+```
+
+identify All High-Score Interactions 
+```{r}
+high_score_data <- dgidb_data %>%
+    filter(interaction.score > 1)  # Adjust threshold based on what’s considered "high"
+print(head(high_score_data))
+```
+else
+```{r}
+# Group by drug type or indication if those are available
+summary_by_approval <- dgidb_data %>%
+    group_by(regulatory.approval) %>%
+    summarise(Count = n())
+print(summary_by_approval)
+
+# Group by indication if it's available
+summary_by_indication <- dgidb_data %>%
+    group_by(indication) %>%
+    summarise(Count = n())
+print(summary_by_indication)
+
+drug_summary <- dgidb_data %>%
+    group_by(drug) %>%
+    summarise(Targeted_Genes = paste(unique(gene), collapse = ", "),
+              Count = n()) %>%
+    arrange(desc(Count))
+print(head(drug_summary))
+
+
+```
+
+
+```{r}
+write.csv(dgidb_data, "filtered_dgidb_data.csv", row.names = FALSE)
+```
+
+Analyze Top Drugs by Targeted Genes
+```{r}
+# Filter for drugs that target more than 5 genes as an example
+multi_target_drugs <- drug_summary %>%
+    filter(Count > 5)
+print(multi_target_drugs)
+```
+
+Assess Approved vs. Unapproved Drugs
+```{r}
+# Filter for only approved drugs, if that’s your focus
+approved_drugs <- dgidb_data %>%
+    filter(regulatory.approval == "Approved")
+print(approved_drugs)
+
+```
+```{r}
+# View the most common indications
+print(head(summary_by_indication, 10))
+
+```
+```{r}
+# Bar Plot of Top Multi-Target Drugs: Shows which drugs target the most genes.
+# Pie Chart of Drug Approval Status: Visualizes the distribution of approved vs. unapproved drugs.
+# Bar Plot of Common Indications: Shows the top indications for the drugs in your dataset.
+
+library(ggplot2)
+
+# Top multi-target drugs plot
+ggplot(multi_target_drugs, aes(x = reorder(drug, -Count), y = Count)) +
+    geom_bar(stat = "identity") +
+    labs(title = "Top Multi-Target Drugs", x = "Drug", y = "Number of Genes Targeted") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggsave("../figures/top_multi target_drugs_plot.png")
+
+# Pie chart for regulatory approval
+ggplot(summary_by_approval, aes(x = "", y = Count, fill = regulatory.approval)) +
+    geom_bar(stat = "identity", width = 1) +
+    coord_polar("y") +
+    labs(title = "Drug Approval Status") +
+    theme_void()
+
+ggsave("../figures/piechart_regulatoryapproval.png")
+
+# Bar plot for indications
+ggplot(head(summary_by_indication, 10), aes(x = reorder(indication, -Count), y = Count)) +
+    geom_bar(stat = "identity") +
+    labs(title = "Top Drug Indications", x = "Indication", y = "Count") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggsave("../figures/barplot_indications.png")
+
+# Filter for approved drugs with high interaction scores
+approved_drugs <- dgidb_data %>%
+    filter(regulatory.approval == "Approved" & interaction.score > 0.5) %>%
+    arrange(desc(interaction.score))
+print(head(approved_drugs))  # View top approved drugs with strong interactions
+
+
+```
+```{r}
+write.csv(drug_summary, "drug_summary.csv", row.names = FALSE)
+write.csv(summary_by_approval, "summary_by_approval.csv", row.names = FALSE)
+write.csv(summary_by_indication, "summary_by_indication.csv", row.names = FALSE)
+write.csv(approved_drugs, "approved_drugs.csv", row.names = FALSE)
+```
+
+
+
+
+
