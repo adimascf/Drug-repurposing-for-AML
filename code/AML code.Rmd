@@ -739,7 +739,159 @@ write.csv(genes_per_drug, "genes_per_drug.csv", row.names = FALSE)
 
 
 ```
+(WORK ON THIS AGAIN)
+Network analysis of gene-drug relationships in R
+
+# Create the Gene-Drug Interaction Data Frame
+```{r}
+network_data <- dgidb_data[, c("gene", "drug")]
+
+# Remove duplicates
+network_data <- unique(network_data)
+
+# Check for missing values and remove if any
+network_data <- na.omit(network_data)
+
+# View the first few rows to confirm structure
+head(network_data)
+
+# Check column names
+colnames(network_data)
 
 
+```
+```{r}
+install.packages("igraph")
+
+library(igraph)
+
+ls("package:igraph", pattern = "^graph_from")
+
+```
 
 
+```{r}
+network_data <- dgidb_data[, c("gene", "drug")]
+
+head(network_data)
+
+
+gene_drug_graph <- igraph::graph_from_data_frame(network_data, directed = FALSE)
+
+
+# Visualize network
+plot(gene_drug_graph, 
+     vertex.size = 5, 
+     vertex.label.cex = 0.7, 
+     vertex.color = "skyblue", 
+     edge.color = "gray", 
+     layout = igraph::layout_with_fr)
+
+```
+
+Analyze network properties
+```{r}
+# Degree (number of connections) for each node
+degree_distribution <- igraph::degree(gene_drug_graph)
+
+
+# Identify the most connected genes/drugs (hubs)
+top_hubs <- sort(degree_distribution, decreasing = TRUE)[1:10]
+print(top_hubs)
+
+```
+
+Save network visualization
+```{r}
+
+#install.packages("visNetwork")
+
+#library(visNetwork)
+
+#visNetworkData <- toVisNetworkData(gene_drug_graph)
+#visNetwork(visNetworkData$nodes, visNetworkData$edges) %>%
+  #visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
+
+png("gene_drug_network.png", width = 1000, height = 800)
+
+#plot(gene_drug_graph, vertex.size = 15, vertex.label.cex = 2.1, 
+ #    vertex.color = "skyblue", edge.color = "gray", layout = #igraph::layout_with_fr)
+```
+
+
+```{r}
+# Load the igraph package
+library(igraph)
+
+# Define a threshold value for high-degree nodes
+threshold <- 5  # You can adjust this value based on your needs
+
+# Filter for high-degree nodes
+high_degree_nodes <- V(gene_drug_graph)[degree(gene_drug_graph) > threshold]
+
+# Create a subgraph with only high-degree nodes
+subgraph <- induced_subgraph(gene_drug_graph, high_degree_nodes)
+
+# Plot the subgraph for easier visualization
+plot(subgraph, vertex.size = 5, vertex.label.cex = 0.7, 
+     vertex.color = "skyblue", edge.color = "gray")
+
+```
+
+
+```{r}
+#clusters <- cluster_fast_greedy(gene_drug_graph)
+
+#plot(clusters, gene_drug_graph)
+```
+
+
+```{r}
+#install.packages("visNetwork")
+#library(visNetwork)
+
+# Assuming your network data is in `network_data` with columns `from` and `to`
+#nodes <- data.frame(id = unique(c(network_data$from, network_data$to)))
+#edges <- data.frame(from = network_data$from, to = network_data$to)
+
+# Visualize with visNetwork
+#visNetwork(nodes, edges) %>%
+  #visInteraction(dragNodes = FALSE, dragView = TRUE, zoomView = TRUE) %>%
+  #visPhysics(stabilization = FALSE)  # Disable physics for smoother performance
+
+```
+
+
+```{r}
+png("gene_drug_network_high_res.png", width = 2000, height = 2000, res = 300)
+plot(gene_drug_graph, vertex.size = 5, vertex.label.cex = 0.5, 
+     vertex.color = "skyblue", edge.color = "gray")
+dev.off()
+```
+
+
+```{r}
+library(ggraph)
+library(igraph)
+
+# Create the graph (if not already created)
+gene_drug_graph <- graph_from_data_frame(network_data, directed = FALSE)
+
+# Filter nodes with degree above a threshold
+high_degree_nodes <- V(gene_drug_graph)[degree(gene_drug_graph) > 50]  # Set a suitable threshold
+subgraph <- induced_subgraph(gene_drug_graph, high_degree_nodes)
+
+# Plot with ggraph, focusing only on the high-degree subgraph
+ggraph(subgraph, layout = "fr") +
+  geom_edge_link(color = "gray", alpha = 0.5) +
+  geom_node_point(aes(size = degree(subgraph)), color = "skyblue") +
+  geom_node_text(aes(label = name), repel = TRUE, size = 3, color = "black") +
+  scale_size(range = c(3, 12), breaks = c(50, 100, 150, 200)) +  # Increase size range and breaks
+  theme_void() +
+  ggtitle("Gene-Drug Network with High-Degree Nodes Highlighted")
+
+
+```
+
+
+```{r}
