@@ -156,61 +156,6 @@ samples (technical replicates)?
 
 
 
-## Data Normalization with DESeq2
-
-```{r}
-# Normalize Gene Expression Data
-# dds <- DESeq(dds)
-
-# Extract Normalized Counts
-# normalized_counts <- counts(dds, normalized = TRUE)
-# head(normalized_counts)
-
-# Variance Stabilizing Transformation (VST)
-# vsd <- vst(dds, blind = FALSE)
-# rlog_data <- rlog(dds, blind = FALSE)  # Optional if you prefer rlog
-
-```
-
-## Verify normalization
-```{r}
-# Plot a PCA (ERROR HERE)
-#plotPCA(vsd, intgroup = "condition")
-
-# Heatmap: Use the normalized counts or VST-transformed data to generate a heatmap to check for clustering:
-#top_var_genes <- head(order(rowVars(assay(vsd)), decreasing = TRUE), 500)
-
-# Check and convert data to numeric if needed
-#numeric_data <- as.matrix(apply(assay(vsd)[top_var_genes, ], 2, as.numeric))
-
-
-
-# Plot the heatmap with numeric data
-# Ensure required libraries are loaded
-#library(pheatmap)
-#library(RColorBrewer)
-
-# Compute the distance matrix for samples
-#distance <- dist(t(assay(vst_aml)))
-#distance_matrix <- as.matrix(distance)
-
-# Ensure the row and column names are properly assigned
-#rownames(distance_matrix) <- vst_aml$condition  # Adjust as needed (e.g., sample IDs or conditions)
-#colnames(distance_matrix) <- colnames(vst_aml)  # Use sample names if available
-
-# Define color palette for heatmap
-#colors <- colorRampPalette(rev(brewer.pal(9, "Reds")))(255)
-
-# Plot the heatmap
-#pheatmap(distance_matrix,
-        # clustering_distance_rows = distance,
-       #  clustering_distance_cols = distance,
-       #  col = colors,
-        # main = "Sample Clustering Heatmap")
-
-
-```
-
 
 ```{r}
 library(ggplot2)
@@ -495,8 +440,12 @@ while downregulated genes may reveal suppressed tumor suppressor pathways.
 # Upregulated genes (positive log2 fold change)
 upregulated_genes <- significant_DEGs_df[significant_DEGs_df$log2FoldChange > 0, ]
 
+upregulated_genes
+
 # Downregulated genes (negative log2 fold change)
 downregulated_genes <- significant_DEGs_df[significant_DEGs_df$log2FoldChange < 0, ]
+
+downregulated_genes
 
 ## View top genes
 # view the top 10 upregulated and downregulated genes to gain insights into specific genes that might play roles in AML.
@@ -536,6 +485,149 @@ top_DEGs_summary <- significant_DEGs_df %>%
 print(top_DEGs_summary)
 
 ```
+
+
+Preparation of ROC Analysis
+```{r}
+normalized_counts <- counts(dds, normalized = TRUE)
+expression_matrix <- as.data.frame(normalized_counts)
+
+dim(expression_matrix)
+head(expression_matrix)
+
+upregulated_gene_list <- rownames(numeric_genes)  # List of upregulated genes
+filtered_expression_matrix <- expression_matrix[rownames(expression_matrix) %in% upregulated_gene_list, ]
+
+dim(filtered_expression_matrix)  # Should show genes x samples
+
+n_aml <- 8  
+n_healthy <- 7
+
+class_labels <- c(rep(1, n_aml), rep(0, n_healthy))
+
+```
+ROC Analysis for Upregulated Genes
+
+```{r}
+# Load necessary libraries
+library(pROC)
+
+# Ensure the expression matrix has numeric values
+expression_matrix <- as.matrix(expression_matrix)
+
+# Subset the expression matrix for upregulated genes
+filtered_expression_matrix <- expression_matrix[rownames(expression_matrix) %in% upregulated_gene_list, ]
+
+# Ensure the class labels are numeric and match the number of samples
+class_labels <- c(rep(1, n_aml), rep(0, n_healthy))
+
+# Calculate AUC values for each gene
+auc_values <- sapply(rownames(filtered_expression_matrix), function(gene) {
+  roc_obj <- roc(class_labels, filtered_expression_matrix[gene, ])
+  auc(roc_obj)
+})
+
+# View the AUC results
+head(auc_values)
+
+# Sort genes by AUC values
+sorted_auc <- sort(auc_values, decreasing = TRUE)
+
+# Plot the top 20 genes by AUC
+barplot(head(sorted_auc, 20), las = 2, col = "blue",
+        main = "Top 20 Upregulated Genes by AUC", xlab = "Genes", ylab = "AUC")
+
+# Save AUC results to a CSV file
+write.csv(data.frame(Gene = names(sorted_auc), AUC = sorted_auc),
+          "upregulated_genes_auc.csv", row.names = FALSE)
+
+
+```
+AUC > 0.7: Moderate biomarker potential
+AUC > 0.8: Strong biomarker potential
+AUC > 0.9: Excellent biomarker potential
+
+
+
+Visualize the Results
+```{r}
+hist(auc_values, breaks = 20, main = "AUC Distribution of Upregulated Genes", xlab = "AUC", col = "blue")
+
+# Sort genes by AUC values
+sorted_auc <- sort(auc_values, decreasing = TRUE)
+
+library(ggplot2)
+
+# Convert to data frame for ggplot2
+auc_df <- data.frame(
+  Gene = names(sorted_auc)[1:20],
+  AUC = head(sorted_auc, 20)
+)
+
+# Create bar plot
+ggplot(auc_df, aes(x = reorder(Gene, -AUC), y = AUC)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  coord_flip() +  # Rotate the plot for better readability
+  labs(title = "Top 20 Genes by AUC", x = "Genes", y = "AUC") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+Filter Genes with High AUC
+```{r}
+excellent_auc_genes <- names(sorted_auc[sorted_auc > 0.9])  # > 0.9 Excellent biomarker potential
+length(excellent_auc_genes)  # Count the number of strong biomarker candidates
+print(excellent_auc_genes)   # View the gene names
+
+write.csv(data.frame(Gene = excellent_auc_genes, AUC = sorted_auc[excellent_auc_genes]), 
+          "excellent_upregulated_genes_auc.csv", row.names = FALSE)
+
+```
+ROC Curve for ENSG00000261026 (ERROR)
+```{r}
+if (!requireNamespace("pROC", quietly = TRUE)) {
+    install.packages("pROC")
+}
+
+library(pROC)
+
+
+# Check the class of the predictor
+class(expression_matrix[single_gene, ])
+
+# Convert the row to numeric
+expression_matrix[single_gene, ] <- as.numeric(expression_matrix[single_gene, ])
+
+# Check for missing values
+sum(is.na(expression_matrix[single_gene, ]))
+
+# Remove missing values if necessary
+expression_matrix[single_gene, ] <- na.omit(expression_matrix[single_gene, ])
+
+
+# Example for a single gene
+single_gene <- "ENSG00000261026"  
+roc_obj <- roc(class_labels, expression_matrix[single_gene, ])
+
+# Plot the ROC curve
+plot(roc_obj, main = paste("ROC Curve for", single_gene), col = "skyblue", lwd = 2)
+
+# Add AUC to the plot
+auc_value <- auc(roc_obj)
+legend("bottomright", legend = paste("AUC =", round(auc_value, 3)), col = "blue", lwd = 2)
+
+```
+
+
+
+
+
+
+
+
+
+
 
 Identify Potential Target Genes
 ```{r}
