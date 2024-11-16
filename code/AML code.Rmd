@@ -203,6 +203,9 @@ significant_DEGs <- subset(resOrdered, padj < 0.05 & abs(log2FoldChange) > 2)
 
 # Print the number of significant DEGs found
 print(paste("Number of significant DEGs:", nrow(significant_DEGs)))
+# ---- OUTPUT ---- #
+# "Number of significant DEGs: 8112"
+# ---------------- #
 
 ```
 
@@ -438,14 +441,33 @@ while downregulated genes may reveal suppressed tumor suppressor pathways.
 ```{r}
 ## Extract upregulated and downregulated genes:
 # Upregulated genes (positive log2 fold change)
-upregulated_genes <- significant_DEGs_df[significant_DEGs_df$log2FoldChange > 0, ]
+upregulated_genes <- significant_DEGs_df[significant_DEGs_df$log2FoldChange > 2, ]
 
 upregulated_genes
+
+# Count the number of upregulated genes
+num_upregulated_genes <- nrow(upregulated_genes)
+
+# Print the result
+print(paste("Number of upregulated genes:", num_upregulated_genes))
+# OUTPUT: "Number of upregulated genes: 6006"
+# ------------------------------------------ #
+
+
 
 # Downregulated genes (negative log2 fold change)
 downregulated_genes <- significant_DEGs_df[significant_DEGs_df$log2FoldChange < 0, ]
 
 downregulated_genes
+
+# Count the number of upregulated genes
+num_downregulated_genes <- nrow(downregulated_genes)
+
+# Print the result
+print(paste("Number of downregulated genes:", num_downregulated_genes))
+# OUTPUT: "Number of downregulated genes: 2106"
+# ------------------------------------------ #
+
 
 ## View top genes
 # view the top 10 upregulated and downregulated genes to gain insights into specific genes that might play roles in AML.
@@ -461,529 +483,259 @@ head(downregulated_genes, 10)
 # to visualize the spread of gene expression differences between AML and healthy samples.
 hist(significant_DEGs_df$log2FoldChange, breaks = 50, col = "skyblue",
      main = "Log2 Fold Change Distribution", xlab = "Log2 Fold Change")
+
 ```
 
 Filter and Prioritize Genes Based on Relevance to AML
 ```{r}
 # Load necessary libraries
 library(dplyr)
-library(magrittr)
-
-# Convert to data frame if not already
-significant_DEGs_df <- as.data.frame(significant_DEGs)
-
-# Move rownames (gene IDs) to a new column called 'gene_name'
-significant_DEGs_df <- significant_DEGs_df %>%
-  dplyr::mutate(gene_name = rownames(significant_DEGs_df)) %>%
-  dplyr::select(gene_name, log2FoldChange, padj)
-
-# Filter for top DEGs with |log2FoldChange| > 2
-top_DEGs_summary <- significant_DEGs_df %>%
-  dplyr::filter(log2FoldChange > 2 | log2FoldChange < -2)
-
-# Print the summary table
-print(top_DEGs_summary)
-
-```
-
-
-Preparation of ROC Analysis
-```{r}
-normalized_counts <- counts(dds, normalized = TRUE)
-expression_matrix <- as.data.frame(normalized_counts)
-
-dim(expression_matrix)
-head(expression_matrix)
-
-upregulated_gene_list <- rownames(numeric_genes)  # List of upregulated genes
-filtered_expression_matrix <- expression_matrix[rownames(expression_matrix) %in% upregulated_gene_list, ]
-
-dim(filtered_expression_matrix)  # Should show genes x samples
-
-n_aml <- 8  
-n_healthy <- 7
-
-class_labels <- c(rep(1, n_aml), rep(0, n_healthy))
-
-```
-ROC Analysis for Upregulated Genes
-
-```{r}
-# Load necessary libraries
 library(pROC)
 
-# Ensure the expression matrix has numeric values
-expression_matrix <- as.matrix(expression_matrix)
+# Step 1: Convert to data frame 
+upregulated_significant_DEGs_df <- as.data.frame(upregulated_genes)
 
-# Subset the expression matrix for upregulated genes
-filtered_expression_matrix <- expression_matrix[rownames(expression_matrix) %in% upregulated_gene_list, ]
+# Step 2: Add gene names from rownames
+upregulated_significant_DEGs_df <- upregulated_significant_DEGs_df %>%
+  dplyr::mutate(gene_name = rownames(upregulated_significant_DEGs_df)) %>%
+  dplyr::select(gene_name, log2FoldChange, padj)
 
-# Ensure the class labels are numeric and match the number of samples
-class_labels <- c(rep(1, n_aml), rep(0, n_healthy))
+# Step 3: Filter for top DEGs with |log2FoldChange| > 2
+##top_upregulated_DEGs_summary <- upregulated_significant_DEGs_df %>%
+##  dplyr::filter(log2FoldChange > 2)  # Only upregulated genes
 
-# Calculate AUC values for each gene
+
+# Upregulated genes (positive log2 fold change)
+top_upregulated_genes <- significant_DEGs_df[significant_DEGs_df$log2FoldChange > 2, ]
+
+top_upregulated_genes
+
+# Count the number of upregulated genes
+num_top_upregulated_DEGs <- nrow(top_upregulated_genes)
+
+# Print the result
+print(paste("Number of top upregulated genes:", num_top_upregulated_DEGs_summary))
+# OUTPUT: "Number of top upregulated genes: 6006"
+
+
+
+
+# Step 4: Match these DEGs with expression data
+# Assuming `expression_matrix` contains normalized expression values with genes as rows
+filtered_expression_matrix <- expression_matrix[rownames(expression_matrix) %in% top_upregulated_DEGs_summary$gene_name, ]
+
+# Step 5: Define class labels
+# 1 = AML (cases), 0 = Healthy (controls)
+class_labels <- c(rep(1, n_aml), rep(0, n_healthy))  # Adjust n_aml and n_healthy as per your data
+
+# Check if all elements in the matrix are numeric
+is_numeric <- sapply(filtered_expression_matrix, is.numeric)
+table(is_numeric)  # This will count how many columns are numeric vs non-numeric
+
+# Keep only numeric rows/columns
+filtered_expression_matrix <- filtered_expression_matrix[sapply(filtered_expression_matrix, is.numeric), ]
+
+# Example of log-transformation for normalization (if needed)
+##filtered_expression_matrix <- log2(filtered_expression_matrix + 1)
+
+# Define class labels
+class_labels <- c(rep(1, n_aml), rep(0, n_healthy))  # Replace with actual counts
+
+# Step 6: Perform ROC analysis for each gene
 auc_values <- sapply(rownames(filtered_expression_matrix), function(gene) {
-  roc_obj <- roc(class_labels, filtered_expression_matrix[gene, ])
+  roc_obj <- roc(class_labels, as.numeric(filtered_expression_matrix[gene, ]))
   auc(roc_obj)
 })
 
-# View the AUC results
+# Check the output
 head(auc_values)
 
-# Sort genes by AUC values
+
+# Step 7: Sort genes by AUC values (descending order)
 sorted_auc <- sort(auc_values, decreasing = TRUE)
 
-# Plot the top 20 genes by AUC
-barplot(head(sorted_auc, 20), las = 2, col = "blue",
-        main = "Top 20 Upregulated Genes by AUC", xlab = "Genes", ylab = "AUC")
-
-# Save AUC results to a CSV file
-write.csv(data.frame(Gene = names(sorted_auc), AUC = sorted_auc),
-          "upregulated_genes_auc.csv", row.names = FALSE)
-
-
-```
-AUC > 0.7: Moderate biomarker potential
-AUC > 0.8: Strong biomarker potential
-AUC > 0.9: Excellent biomarker potential
-
-
-
-Visualize the Results
-```{r}
-hist(auc_values, breaks = 20, main = "AUC Distribution of Upregulated Genes", xlab = "AUC", col = "blue")
-
-# Sort genes by AUC values
-sorted_auc <- sort(auc_values, decreasing = TRUE)
-
-library(ggplot2)
-
-# Convert to data frame for ggplot2
-auc_df <- data.frame(
-  Gene = names(sorted_auc)[1:20],
-  AUC = head(sorted_auc, 20)
+# Step 8: Visualize the top 20 genes by AUC
+barplot(
+  head(sorted_auc, 20),
+  las = 2,
+  col = "blue",
+  main = "Top 20 Genes by AUC",
+  xlab = "Genes",
+  ylab = "AUC"
 )
 
-# Create bar plot
-ggplot(auc_df, aes(x = reorder(Gene, -AUC), y = AUC)) +
-  geom_bar(stat = "identity", fill = "blue") +
-  coord_flip() +  # Rotate the plot for better readability
-  labs(title = "Top 20 Genes by AUC", x = "Genes", y = "AUC") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+# Step 9: Save the AUC values to a CSV file
+write.csv(
+  data.frame(Gene = names(sorted_auc), AUC = sorted_auc),
+  "NEW_sorted_genes_auc.csv",
+  row.names = FALSE
+)
+
+strong_auc_genes <- names(sorted_auc[sorted_auc > 0.8])  # > 0.8 biomarker potential
+length(strong_auc_genes)  # Count the number of strong biomarker candidates
+print(strong_auc_genes)   # View the gene names
+
+write.csv(data.frame(Gene = strong_auc_genes, AUC = sorted_auc[strong_auc_genes]), 
+          "NEW_strong_upregulated_genes_auc.csv", row.names = FALSE)
 
 ```
 
-Filter Genes with High AUC
-```{r}
-excellent_auc_genes <- names(sorted_auc[sorted_auc > 0.9])  # > 0.9 Excellent biomarker potential
-length(excellent_auc_genes)  # Count the number of strong biomarker candidates
-print(excellent_auc_genes)   # View the gene names
 
-write.csv(data.frame(Gene = excellent_auc_genes, AUC = sorted_auc[excellent_auc_genes]), 
-          "excellent_upregulated_genes_auc.csv", row.names = FALSE)
+PATHWAY ANALYSIS (RE-WORKING)
 
-```
-ROC Curve for ENSG00000261026 (ERROR)
+
+1. Prepare gene list
+Convert Ensembl IDs to Entrez IDs
 ```{r}
-if (!requireNamespace("pROC", quietly = TRUE)) {
-    install.packages("pROC")
+
+# Use Biomart for Conversion
+
+# Install required packages
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
 }
+BiocManager::install(c("org.Hs.eg.db", "clusterProfiler"))
+BiocManager::install("biomaRt")
 
-library(pROC)
+# Load libraries
+library(org.Hs.eg.db)
+library(clusterProfiler)
+library(biomaRt)
+
+# Connect to Ensembl Biomart
+ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+
+# Replace with the actual file path
+gene_file <- "NEW_strong_upregulated_genes_auc.csv"  
+
+# Read the file 
+genes_from_file <- read.csv(gene_file, header = TRUE)  
+
+# the column with Ensembl IDs is named "Gene"
+gene_list_ensembl <- genes_from_file$Gene
+
+print(gene_list_ensembl)
+
+gene_conversion <- bitr(
+    gene_list_ensembl ,
+    fromType = "ENSEMBL",
+    toType = "ENTREZID",
+    OrgDb = org.Hs.eg.db
+)
+
+# View the conversion
+print(gene_conversion)
 
 
-# Check the class of the predictor
-class(expression_matrix[single_gene, ])
+```
+```{r}
+# Check how many genes were successfully mapped
+mapped_genes <- gene_conversion$ENTREZID
+print(length(mapped_genes))  # Number of mapped genes
 
-# Convert the row to numeric
-expression_matrix[single_gene, ] <- as.numeric(expression_matrix[single_gene, ])
-
-# Check for missing values
-sum(is.na(expression_matrix[single_gene, ]))
-
-# Remove missing values if necessary
-expression_matrix[single_gene, ] <- na.omit(expression_matrix[single_gene, ])
-
-
-# Example for a single gene
-single_gene <- "ENSG00000261026"  
-roc_obj <- roc(class_labels, expression_matrix[single_gene, ])
-
-# Plot the ROC curve
-plot(roc_obj, main = paste("ROC Curve for", single_gene), col = "skyblue", lwd = 2)
-
-# Add AUC to the plot
-auc_value <- auc(roc_obj)
-legend("bottomright", legend = paste("AUC =", round(auc_value, 3)), col = "blue", lwd = 2)
+# Look for unmapped genes if necessary
+unmapped_genes <- setdiff(gene_list, gene_conversion$ENSEMBL)
+print(unmapped_genes)  # List of genes that failed to map
 
 ```
 
-
-
-
-
-
-
-
-
-
-
-Identify Potential Target Genes
+2. Perform GO Enrichment
 ```{r}
 # Load necessary libraries
-if (!requireNamespace("clusterProfiler", quietly = TRUE)) {
-    install.packages("clusterProfiler")
-}
 library(clusterProfiler)
 
-# Ensure that you have your organism database loaded, for instance, org.Hs.eg.db for human
-if (!requireNamespace("org.Hs.eg.db", quietly = TRUE)) {
-    BiocManager::install("org.Hs.eg.db")
+# Perform GO enrichment for Biological Processes
+go_results <- enrichGO(
+    gene         = mapped_genes,
+    OrgDb        = org.Hs.eg.db,
+    keyType      = "ENTREZID",
+    ont          = "BP",  # Can also use "CC" (Cellular Component) or "MF" (Molecular Function)
+    pvalueCutoff = 0.05,
+    qvalueCutoff = 0.2
+)
+
+# View the top results
+head(go_results@result)
+
+```
+GO visualization
+```{r}
+# For GO results
+library(enrichplot)
+dotplot(go_results, showCategory = 10, title = "GO Enrichment Analysis")
+
+ggsave("../figures/NEW_GO_enrichment.png")
+
+```
+
+
+3. Perform KEGG pathway enrichment
+```{r}
+# Perform KEGG pathway enrichment
+kegg_results <- enrichKEGG(
+    gene         = mapped_genes,
+    organism     = "hsa", 
+    pvalueCutoff = 0.05,
+    qvalueCutoff = 0.2
+)
+
+# View the top results
+head(kegg_results@result)
+```
+
+KEGG visualization
+```{r}
+# For KEGG results
+dotplot(kegg_results, showCategory = 10, title = "KEGG Pathway Enrichment")
+ggsave("../figures/NEW_KEGG_enrichment_pathway.png")
+
+```
+Save GO and KEGG results in a CSV file
+```{r}
+# Save GO results to a CSV file
+write.csv(go_results@result, "NEW_GO_Enrichment_Results.csv", row.names = FALSE)
+
+# Save KEGG results to a CSV file
+write.csv(kegg_results@result, "NEW_KEGG_Enrichment_Results.csv", row.names = FALSE)
+
+```
+
+
+
+Drug Repurposing using DGIdb Platform
+```{r}
+# Install and load the biomaRt package
+if (!requireNamespace("biomaRt", quietly = TRUE)) {
+    install.packages("biomaRt")
 }
-library(org.Hs.eg.db)
-
-# Assuming `gene_list` contains your significant DEGs in ENTREZ ID format
-enrich_kegg_results <- enrichKEGG(gene = gene_list, organism = "hsa", pvalueCutoff = 0.05)
-
-```
-
-Pathway and Network Analysis
-```{r}
-kegg_df <- as.data.frame(enrich_kegg_results)
-#head(kegg_df)  # View the top rows to inspect the enrichment results
-
-# Filter for specific pathways
-target_pathways <- kegg_df %>%
-    filter(Description %in% c("PI3K-Akt signaling pathway", "JAK-STAT signaling pathway", "Cytokine-cytokine receptor interaction"))
-print(target_pathways)
+library(biomaRt)
 
 
-```
-```{r}
-pathway_genes <- target_pathways %>%
-   pull(geneID) %>%
-   strsplit("/") %>%
-   unlist() %>%
-   unique()  # Remove duplicates
+# Connect to Ensembl database
+mart <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
 
-print(pathway_genes)
+# Define your Entrez Gene IDs
+entrez_ids <- c(1440, 3655, 8817, 6696, 7059, 2250, 3082, 1441, 90993, 7099, 
+                1950, 2252, 9048, 627, 56034, 1942, 131873, 3815)
 
-```
+# Convert Entrez Gene IDs to HGNC symbols
+gene_conversion_HGNC <- getBM(
+    attributes = c("entrezgene_id", "hgnc_symbol"),
+    filters = "entrezgene_id",
+    values = entrez_ids,
+    mart = mart
+)
 
-Convert Gene IDs to Gene Symbols (if needed)
-Some drug-gene databases, like DGIdb, may require gene symbols instead of KEGG IDs. Use a conversion tool if your gene IDs are in KEGG format.
-```{r}
-library(org.Hs.eg.db)
-pathway_genes_symbols <- mapIds(org.Hs.eg.db, keys = pathway_genes,
-                                column = "SYMBOL", keytype = "ENTREZID", multiVals = "first")
-pathway_genes_symbols <- na.omit(pathway_genes_symbols)  # Remove any NAs
-print(pathway_genes_symbols)
-```
+# View the conversion results
+print(gene_conversion_HGNC)
 
 
-```{r}
-# Export gene symbols to a CSV file for manual upload
-write.csv(data.frame(GeneSymbol = pathway_genes_symbols), "pathway_genes_symbols.csv", row.names = FALSE)
-
-```
-
-
-
-
-Filter gene list from DGIdb by Interaction Type (do we use this/no?)
-```{r}
-# Load necessary libraries
-library(dplyr)
-
-list.files(recursive = TRUE)
-
-# Read in the DGIdb data
-dgidb_data <- read.delim("gene_interaction_results-11_6_2024.tsv", sep = "\t")
-head(dgidb_data)
-
-
-# View column names
-colnames(dgidb_data)
-# View the first few rows of the data
-head(dgidb_data)
-
-```
-
-identify All High-Score Interactions 
-```{r}
-high_score_data <- dgidb_data %>%
-    filter(interaction.score > 1)  # Adjust threshold based on what’s considered "high"
-print(head(high_score_data))
-```
-else
-```{r}
-# Group by drug type or indication if those are available
-summary_by_approval <- dgidb_data %>%
-    group_by(regulatory.approval) %>%
-    summarise(Count = n())
-print(summary_by_approval)
-
-# Group by indication if it's available
-summary_by_indication <- dgidb_data %>%
-    group_by(indication) %>%
-    summarise(Count = n())
-print(summary_by_indication)
-
-drug_summary <- dgidb_data %>%
-    group_by(drug) %>%
-    summarise(Targeted_Genes = paste(unique(gene), collapse = ", "),
-              Count = n()) %>%
-    arrange(desc(Count))
-print(head(drug_summary))
+# Save the HGNC symbols to a CSV file
+write.csv(gene_conversion, "converted_gene_ids_to_hgnc.csv", row.names = FALSE)
 
 
 ```
 
 
-```{r}
-write.csv(dgidb_data, "filtered_dgidb_data.csv", row.names = FALSE)
-```
 
-Analyze Top Drugs by Targeted Genes
-```{r}
-# Filter for drugs that target more than 5 genes as an example
-multi_target_drugs <- drug_summary %>%
-    filter(Count > 5)
-print(multi_target_drugs)
-```
 
-Assess Approved vs. Unapproved Drugs
-```{r}
-# Filter for only approved drugs, if that’s your focus
-approved_drugs <- dgidb_data %>%
-    filter(regulatory.approval == "Approved")
-print(approved_drugs)
-
-```
-```{r}
-# View the most common indications
-print(head(summary_by_indication, 10))
-
-```
-```{r}
-# Bar Plot of Top Multi-Target Drugs: Shows which drugs target the most genes.
-# Pie Chart of Drug Approval Status: Visualizes the distribution of approved vs. unapproved drugs.
-# Bar Plot of Common Indications: Shows the top indications for the drugs in your dataset.
-
-library(ggplot2)
-
-# Top multi-target drugs plot
-ggplot(multi_target_drugs, aes(x = reorder(drug, -Count), y = Count)) +
-    geom_bar(stat = "identity") +
-    labs(title = "Top Multi-Target Drugs", x = "Drug", y = "Number of Genes Targeted") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-ggsave("../figures/top_multi target_drugs_plot.png")
-
-# Pie chart for regulatory approval
-ggplot(summary_by_approval, aes(x = "", y = Count, fill = regulatory.approval)) +
-    geom_bar(stat = "identity", width = 1) +
-    coord_polar("y") +
-    labs(title = "Drug Approval Status") +
-    theme_void()
-
-ggsave("../figures/piechart_regulatoryapproval.png")
-
-# Bar plot for indications
-ggplot(head(summary_by_indication, 10), aes(x = reorder(indication, -Count), y = Count)) +
-    geom_bar(stat = "identity") +
-    labs(title = "Top Drug Indications", x = "Indication", y = "Count") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-ggsave("../figures/barplot_indications.png")
-
-# Filter for approved drugs with high interaction scores
-approved_drugs <- dgidb_data %>%
-    filter(regulatory.approval == "Approved" & interaction.score > 0.5) %>%
-    arrange(desc(interaction.score))
-print(head(approved_drugs))  # View top approved drugs with strong interactions
-
-
-```
-```{r}
-write.csv(drug_summary, "drug_summary.csv", row.names = FALSE)
-write.csv(summary_by_approval, "summary_by_approval.csv", row.names = FALSE)
-write.csv(summary_by_indication, "summary_by_indication.csv", row.names = FALSE)
-write.csv(approved_drugs, "approved_drugs.csv", row.names = FALSE)
-```
-
-
-
-A list of genes per drug
-```{r}
-
-library(dplyr)
-
-# Group by drug and create a list of genes targeted by each drug
-genes_per_drug <- dgidb_data %>%
-    group_by(drug) %>%
-    summarise(Targeted_Genes = paste(unique(gene), collapse = ", "))
-
-print(genes_per_drug)
-
-# Save the result to a CSV file 
-write.csv(genes_per_drug, "genes_per_drug.csv", row.names = FALSE)
-
-
-```
-(WORK ON THIS AGAIN)
-Network analysis of gene-drug relationships in R
-
-# Create the Gene-Drug Interaction Data Frame
-```{r}
-network_data <- dgidb_data[, c("gene", "drug")]
-
-# Remove duplicates
-network_data <- unique(network_data)
-
-# Check for missing values and remove if any
-network_data <- na.omit(network_data)
-
-# View the first few rows to confirm structure
-head(network_data)
-
-# Check column names
-colnames(network_data)
-
-
-```
-```{r}
-install.packages("igraph")
-
-library(igraph)
-
-ls("package:igraph", pattern = "^graph_from")
-
-```
-
-
-```{r}
-network_data <- dgidb_data[, c("gene", "drug")]
-
-head(network_data)
-
-
-gene_drug_graph <- igraph::graph_from_data_frame(network_data, directed = FALSE)
-
-
-# Visualize network
-plot(gene_drug_graph, 
-     vertex.size = 5, 
-     vertex.label.cex = 0.7, 
-     vertex.color = "skyblue", 
-     edge.color = "gray", 
-     layout = igraph::layout_with_fr)
-
-```
-
-Analyze network properties
-```{r}
-# Degree (number of connections) for each node
-degree_distribution <- igraph::degree(gene_drug_graph)
-
-
-# Identify the most connected genes/drugs (hubs)
-top_hubs <- sort(degree_distribution, decreasing = TRUE)[1:10]
-print(top_hubs)
-
-```
-
-Save network visualization
-```{r}
-
-#install.packages("visNetwork")
-
-#library(visNetwork)
-
-#visNetworkData <- toVisNetworkData(gene_drug_graph)
-#visNetwork(visNetworkData$nodes, visNetworkData$edges) %>%
-  #visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
-
-png("gene_drug_network.png", width = 1000, height = 800)
-
-#plot(gene_drug_graph, vertex.size = 15, vertex.label.cex = 2.1, 
- #    vertex.color = "skyblue", edge.color = "gray", layout = #igraph::layout_with_fr)
-```
-
-
-```{r}
-# Load the igraph package
-library(igraph)
-
-# Define a threshold value for high-degree nodes
-threshold <- 5  # You can adjust this value based on your needs
-
-# Filter for high-degree nodes
-high_degree_nodes <- V(gene_drug_graph)[degree(gene_drug_graph) > threshold]
-
-# Create a subgraph with only high-degree nodes
-subgraph <- induced_subgraph(gene_drug_graph, high_degree_nodes)
-
-# Plot the subgraph for easier visualization
-plot(subgraph, vertex.size = 5, vertex.label.cex = 0.7, 
-     vertex.color = "skyblue", edge.color = "gray")
-
-```
-
-
-```{r}
-#clusters <- cluster_fast_greedy(gene_drug_graph)
-
-#plot(clusters, gene_drug_graph)
-```
-
-
-```{r}
-#install.packages("visNetwork")
-#library(visNetwork)
-
-# Assuming your network data is in `network_data` with columns `from` and `to`
-#nodes <- data.frame(id = unique(c(network_data$from, network_data$to)))
-#edges <- data.frame(from = network_data$from, to = network_data$to)
-
-# Visualize with visNetwork
-#visNetwork(nodes, edges) %>%
-  #visInteraction(dragNodes = FALSE, dragView = TRUE, zoomView = TRUE) %>%
-  #visPhysics(stabilization = FALSE)  # Disable physics for smoother performance
-
-```
-
-
-```{r}
-png("gene_drug_network_high_res.png", width = 2000, height = 2000, res = 300)
-plot(gene_drug_graph, vertex.size = 5, vertex.label.cex = 0.5, 
-     vertex.color = "skyblue", edge.color = "gray")
-dev.off()
-```
-
-
-```{r}
-library(ggraph)
-library(igraph)
-
-# Create the graph (if not already created)
-gene_drug_graph <- graph_from_data_frame(network_data, directed = FALSE)
-
-# Filter nodes with degree above a threshold
-high_degree_nodes <- V(gene_drug_graph)[degree(gene_drug_graph) > 50]  # Set a suitable threshold
-subgraph <- induced_subgraph(gene_drug_graph, high_degree_nodes)
-
-# Plot with ggraph, focusing only on the high-degree subgraph
-ggraph(subgraph, layout = "fr") +
-  geom_edge_link(color = "gray", alpha = 0.5) +
-  geom_node_point(aes(size = degree(subgraph)), color = "skyblue") +
-  geom_node_text(aes(label = name), repel = TRUE, size = 3, color = "black") +
-  scale_size(range = c(3, 12), breaks = c(50, 100, 150, 200)) +  # Increase size range and breaks
-  theme_void() +
-  ggtitle("Gene-Drug Network with High-Degree Nodes Highlighted")
-
-
-```
-
-
-```{r}
